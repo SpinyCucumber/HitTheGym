@@ -18,7 +18,7 @@ public class LiftHandler {
 		// Only update once per tick
 		if (event.phase == TickEvent.Phase.END) return;
 		// Get lifter state and update
-		event.player.getCapability(ILifter.CAPABILITY, null).getState().tick(event.player);
+		event.player.getCapability(ILifter.CAPABILITY, null).getState().tick();
 	}
 	
 }

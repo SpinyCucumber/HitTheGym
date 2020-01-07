@@ -6,7 +6,11 @@ import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 import spinyq.hitthegym.client.Sounds;
+import spinyq.hitthegym.common.network.MessageLifterState;
+import spinyq.hitthegym.common.network.Messages;
 
 /**
  * Represents the state of a lifter...
@@ -24,27 +28,42 @@ public class LifterState {
 		IDLE, ACTIVE;
 	}
 
-	public static final LifterState IDLE = new LifterState(); // Nothing special about this state
+	/**
+	 * A reference to the player this state is attached to
+	 */
+	private EntityPlayer player;
+	
+	/**
+	 * @return The player that this state is attached to
+	 */
+	public EntityPlayer getPlayer() {
+		return player;
+	}
+	
+	public void setPlayer(EntityPlayer player) {
+		this.player = player;
+	}
 	
 	/**
 	 * Called during player rendering to set a player's arms' rotation, etc.
 	 * @param player
 	 */
-	public void animate(AbstractClientPlayer player) {
+	@SideOnly(Side.CLIENT)
+	public void animate() {
 		// By default do nothing
 	}
 	
 	/**
 	 * Called when a player transitions to this state
 	 */
-	public void onAdd(EntityPlayer player) {
+	public void onAdd() {
 		// Do nothing
 	}
 	
 	/**
 	 * Called when a player transitions from this state to another
 	 */
-	public void onRemove(EntityPlayer player) {
+	public void onRemove() {
 		// Do nothing
 	}
 	
@@ -57,7 +76,7 @@ public class LifterState {
 	 * Called every tick (server-side and client-side)
 	 * @param player
 	 */
-	public void tick(EntityPlayer player) {
+	public void tick() {
 		// By default do nothing
 	}
 	
@@ -69,6 +88,15 @@ public class LifterState {
 		// By default do nothing
 	}
 	
+	/**
+	 * Notifies the server that this lifter state has changed and updates it.
+	 */
+	public void sendToServer() {
+		// DEBUG
+		// HitTheGymMod.log.info("Sending lifter state to server for player {}", getPlayer());
+		Messages.instance.sendToServer(new MessageLifterState(this));
+	}
+	
 	public static class Active extends LifterState {
 		
 		public Exercise exercise; // When active, lifters are performing a specific exercise
@@ -78,15 +106,14 @@ public class LifterState {
 		public int timer = 0;
 		
 		public Active(Exercise exercise) {
-			super();
 			this.exercise = exercise;
 			this.liftProgress = 0.0;
 			lifting = false;
 		}
 
 		@Override
-		public void animate(AbstractClientPlayer player) {
-			exercise.animate(player, liftProgress);
+		public void animate() {
+			exercise.animate((AbstractClientPlayer) getPlayer(), liftProgress);
 		}
 
 		@Override
@@ -104,37 +131,37 @@ public class LifterState {
 		}
 
 		@Override
-		public void onAdd(EntityPlayer player) {
-			exercise.onAdd(player);
+		public void onAdd() {
+			exercise.onAdd(getPlayer());
 		}
 
 		@Override
-		public void onRemove(EntityPlayer player) {
-			exercise.onRemove(player);
+		public void onRemove() {
+			exercise.onRemove(getPlayer());
 		}
 
 		@Override
-		public void tick(EntityPlayer player) {
+		public void tick() {
 			// If player is actively lifting, increase lift progress. Else, drop lift. In both cases clamp the total progress
 			liftProgress = lifting ? Math.min(liftProgress + liftRate / 20.0, maxLiftProgress)
 					: Math.max(liftProgress - dropRate / 20.0, 0.0);
 			// ONLY ON THE SERVER, play some sound effects every so often.
-			if (!player.world.isRemote && lifting) {
+			if (!getPlayer().world.isRemote && lifting) {
 				// Update timer
 				timer++;
-				World world = player.world;
+				World world = getPlayer().world;
 				if (timer % 40 == 0) {
-					Vec3d pos = player.getPositionEyes(0);
+					Vec3d pos = getPlayer().getPositionEyes(0);
 					world.playSound(null, pos.x, pos.y, pos.z, Sounds.lift, SoundCategory.VOICE, 1.0f, 1.0f);
 				}
 			}
 			// ONLY ON THE CLIENT, spawn some particles every so often.
-			if (player.world.isRemote && lifting) {
+			if (getPlayer().world.isRemote && lifting) {
 				// Update timer
 				timer++;
-				World world = player.world;
+				World world = getPlayer().world;
 				if (timer % 5 == 0) {
-					Vec3d pos = player.getPositionEyes(0);
+					Vec3d pos = getPlayer().getPositionEyes(0);
 					world.spawnParticle(EnumParticleTypes.WATER_SPLASH, pos.x, pos.y, pos.z, 5, 5, 5);
 				}
 			}

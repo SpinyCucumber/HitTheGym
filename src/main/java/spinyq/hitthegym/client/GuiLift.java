@@ -1,7 +1,6 @@
 package spinyq.hitthegym.client;
 
 import java.io.IOException;
-import java.util.UUID;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
@@ -10,8 +9,6 @@ import spinyq.hitthegym.common.ExerciseSet;
 import spinyq.hitthegym.common.ILifter;
 import spinyq.hitthegym.common.LifterState;
 import spinyq.hitthegym.common.LifterState.Active;
-import spinyq.hitthegym.network.MessageLifterState;
-import spinyq.hitthegym.network.Messages;
 
 public class GuiLift extends GuiScreen {
 	
@@ -30,15 +27,16 @@ public class GuiLift extends GuiScreen {
 		iExercise = 0;
 		// Start with first exercise
 		lifterState = new Active(exercises.getList().get(iExercise));
-		Minecraft.getMinecraft().player.getCapability(ILifter.CAPABILITY, null).setState(lifterState, Minecraft.getMinecraft().player);
-		updateServer();
+		Minecraft.getMinecraft().player.getCapability(ILifter.CAPABILITY, null).setState(lifterState);
+		lifterState.sendToServer();
 	}
 
 	@Override
 	public void onGuiClosed() {
 		// When GUI is closed, set lifter state back to idle
-		Minecraft.getMinecraft().player.getCapability(ILifter.CAPABILITY, null).setState(LifterState.IDLE, Minecraft.getMinecraft().player);
-		updateServer();
+		LifterState newState = new LifterState();
+		Minecraft.getMinecraft().player.getCapability(ILifter.CAPABILITY, null).setState(newState);
+		newState.sendToServer();
 	}
 
 	@Override
@@ -64,13 +62,13 @@ public class GuiLift extends GuiScreen {
 		// Start lifting if left click
 		if (mouseButton == LIFT_BUTTON) {
 			lifterState.lifting = true;
-			updateServer();
+			lifterState.sendToServer();
 		}
 		// Cycle exercise if right click
 		if (lifterState.liftProgress == 0.0 && mouseButton == CYCLE_BUTTON) {
 			iExercise = (iExercise + 1) % exercises.getList().size();
 			lifterState.exercise = exercises.getList().get(iExercise);
-			updateServer();
+			lifterState.sendToServer();
 		}
 	}
 
@@ -79,14 +77,7 @@ public class GuiLift extends GuiScreen {
 		super.mouseReleased(mouseX, mouseY, state);
 		// Stop lifting if left click
 		if (state == LIFT_BUTTON) lifterState.lifting = false;
-		updateServer();
-	}
-
-	// Sends a message to the server to update our lifter state
-	private void updateServer() {
-		LifterState state = Minecraft.getMinecraft().player.getCapability(ILifter.CAPABILITY, null).getState();
-		UUID id = Minecraft.getMinecraft().player.getUniqueID();
-		Messages.instance.sendToServer(new MessageLifterState(state, id));
+		lifterState.sendToServer();
 	}
 	
 }

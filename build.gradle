@@ -32,6 +32,10 @@ minecraft {
     // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
 }
 
+runClient {
+    jvmArgs "-Dfml.coreMods.load=spinyq.hitthegym.common.asm.LoadingPlugin"
+}
+
 dependencies {
     // you may put jars on which you depend on in ./libs
     // or you may define them like so..

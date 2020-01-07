@@ -28,7 +28,7 @@ public interface ILifter {
 	 * Sets the state, and calls handlers.
 	 * @param state
 	 */
-	void setState(LifterState state, EntityPlayer player);
+	void setState(LifterState state);
 	
 	@CapabilityInject(ILifter.class)
 	public static final Capability<ILifter> CAPABILITY = null;
@@ -39,9 +39,8 @@ public interface ILifter {
 
 		private LifterState state;
 		
-		public Impl() {
-			// By default nobody lifts when they spawn...
-			state = LifterState.IDLE;
+		public Impl(LifterState state) {
+			this.state = state;
 		}
 
 		@Override
@@ -50,10 +49,12 @@ public interface ILifter {
 		}
 
 		@Override
-		public void setState(LifterState state, EntityPlayer player) {
-			if (this.state != null) this.state.onRemove(player);
+		public void setState(LifterState state) {
+			if (this.state != null) this.state.onRemove();
+			// Copy the player reference
+			state.setPlayer(this.state.getPlayer());
 			this.state = state;
-			state.onAdd(player);
+			this.state.onAdd();
 		}
 		
 	}
@@ -67,9 +68,11 @@ public interface ILifter {
 
 		private ILifter instance;
 		
-		public Provider() {
-			// Initialize instance
-			instance = CAPABILITY.getDefaultInstance();
+		public Provider(EntityPlayer player) {
+			// Initialize instance and pass reference to player
+			LifterState state = new LifterState();
+			state.setPlayer(player);
+			instance = new Impl(state);
 		}
 
 		@Override
@@ -96,9 +99,10 @@ public interface ILifter {
 		public static void attachCapability(AttachCapabilitiesEvent<Entity> event) {
 			// Only attach to players
 			if (event.getObject() instanceof EntityPlayer) {
+				EntityPlayer player = (EntityPlayer) event.getObject();
 				// DEBUG
-				HitTheGymMod.log.info("Attaching Lifter Capability");
-				event.addCapability(KEY, new Provider());
+				HitTheGymMod.log.info("Attaching Lifter Capability to player {}", player);
+				event.addCapability(KEY, new Provider(player));
 			}
 		}
 		
@@ -113,7 +117,7 @@ public interface ILifter {
 
 		@Override
 		public ILifter call() throws Exception {
-			return new Impl();
+			return new Impl(new LifterState());
 		}
 		
 	}

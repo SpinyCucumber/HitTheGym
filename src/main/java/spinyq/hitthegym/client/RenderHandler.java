@@ -13,7 +13,7 @@ public class RenderHandler {
 			// Cast to player
 			AbstractClientPlayer player = (AbstractClientPlayer) entity;
 			// Pass on logic to player's lifting state
-			player.getCapability(ILifter.CAPABILITY, null).getState().animate(player);
+			player.getCapability(ILifter.CAPABILITY, null).getState().animate();
 		}
 	}
 	
