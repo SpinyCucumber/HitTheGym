@@ -110,6 +110,13 @@ public class LifterState {
 			this.liftProgress = 0.0;
 			lifting = false;
 		}
+		
+		/**
+		 * @return Wheter or not the attached player can use the current exercise.
+		 */
+		public boolean canUseExercise() {
+			return exercise.canUse(getPlayer());
+		}
 
 		@Override
 		public void animate() {

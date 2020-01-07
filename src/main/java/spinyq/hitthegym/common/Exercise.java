@@ -1,5 +1,7 @@
 package spinyq.hitthegym.common;
 
+import com.google.common.collect.ImmutableMap;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.model.ModelBiped;
@@ -24,6 +26,59 @@ import net.minecraftforge.registries.RegistryBuilder;
  */
 public abstract class Exercise extends IForgeRegistryEntry.Impl<Exercise> {
 	
+	/**
+	 * What is "gained" by performing an exercise. Has muscle groups and how much each group is worked.
+	 * @author SpinyQ
+	 *
+	 */
+	public static class RepResult {
+		
+		private ImmutableMap<MuscleGroup, Double> gains;
+
+		/**
+		 * @param gains A map containing musclegroups mapped to how much muscle is added to them when a rep is completed.
+		 */
+		public RepResult(ImmutableMap<MuscleGroup, Double> gains) {
+			super();
+			this.gains = gains;
+		}
+		
+		public void onRep(EntityPlayer player) {
+			// TODO
+		}
+		
+	}
+	
+	/**
+	 * A requirement players must meet before doing an exercise
+	 * @author SpinyQ
+	 *
+	 */
+	public static class StrengthRequirement {
+		
+		private ImmutableMap<MuscleGroup, Double> requirements;
+
+		public StrengthRequirement(ImmutableMap<MuscleGroup, Double> requirements) {
+			super();
+			this.requirements = requirements;
+		}
+		
+		public boolean isMet(EntityPlayer player) {
+			// TODO
+			return true;
+		}
+		
+		/**
+		 * @param player
+		 * @return A message to display to the player when they are not strong enough to perform an exercise.
+		 */
+		public String getStatusMessage(EntityPlayer player) {
+			// TODO
+			return null;
+		}
+		
+	}
+	
 	public abstract void animate(AbstractClientPlayer player, double liftProgress);
 
 	/**
@@ -36,12 +91,36 @@ public abstract class Exercise extends IForgeRegistryEntry.Impl<Exercise> {
 	 */
 	public void onRemove(EntityPlayer player) {}
 	
-	public Exercise(ResourceLocation regName) {
-		this.setRegistryName(regName);
+	/**
+	 * Called when a rep is successfully completed
+	 */
+	public void onRep(EntityPlayer player) {
+		result.onRep(player);
 	}
 	
-	public static Exercise CURL = new Exercise(new ResourceLocation(HitTheGymMod.MODID, "curl")) {
-		
+	public String getStatusMessage(EntityPlayer player) {
+		return requirement.getStatusMessage(player);
+	}
+
+	/**
+	 * Whether or not a player can use this exercise
+	 */
+	public boolean canUse(EntityPlayer player) {
+		return requirement.isMet(player);
+	}
+	
+	public Exercise(ResourceLocation regName, RepResult result, StrengthRequirement requirement) {
+		this.setRegistryName(regName);
+		this.result = result;
+		this.requirement = requirement;
+	}
+	
+	private RepResult result;
+	private StrengthRequirement requirement;
+	
+	public static Exercise CURL = new Exercise(new ResourceLocation(HitTheGymMod.MODID, "curl"),
+			new RepResult(ImmutableMap.of(MuscleGroup.BICEP, 1.0)),
+			new StrengthRequirement(ImmutableMap.of())) {
 		@Override
 		public void animate(AbstractClientPlayer player, double liftProgress) {
 			ModelRenderer arm = getActiveArmRenderer(player);
@@ -51,8 +130,9 @@ public abstract class Exercise extends IForgeRegistryEntry.Impl<Exercise> {
 		
 	};
 	
-	public static Exercise LATERAL = new Exercise(new ResourceLocation(HitTheGymMod.MODID, "lateral")) {
-
+	public static Exercise LATERAL = new Exercise(new ResourceLocation(HitTheGymMod.MODID, "lateral"),
+			new RepResult(ImmutableMap.of(MuscleGroup.DELTOID, 1.0)),
+			new StrengthRequirement(ImmutableMap.of(MuscleGroup.BICEP, 20.0))) {
 		@Override
 		public void animate(AbstractClientPlayer player, double liftProgress) {
 			ModelRenderer arm = getActiveArmRenderer(player);
@@ -63,8 +143,9 @@ public abstract class Exercise extends IForgeRegistryEntry.Impl<Exercise> {
 		
 	};
 	
-	public static Exercise SQUAT = new Exercise(new ResourceLocation(HitTheGymMod.MODID, "squat")) {
-
+	public static Exercise SQUAT = new Exercise(new ResourceLocation(HitTheGymMod.MODID, "squat"),
+			new RepResult(ImmutableMap.of(MuscleGroup.GLUTEAL, 1.0)),
+			new StrengthRequirement(ImmutableMap.of())) {
 		@Override
 		public void animate(AbstractClientPlayer player, double liftProgress) {
 			double progress = liftProgress / 100.0,
@@ -123,7 +204,7 @@ public abstract class Exercise extends IForgeRegistryEntry.Impl<Exercise> {
 		}
 
 		@SubscribeEvent
-		public static void registerBeliefs(RegistryEvent.Register<Exercise> event) {
+		public static void register(RegistryEvent.Register<Exercise> event) {
 			event.getRegistry().registerAll(CURL, LATERAL, SQUAT);
 		}
 		
@@ -150,9 +231,9 @@ public abstract class Exercise extends IForgeRegistryEntry.Impl<Exercise> {
 	 */
 	private static ModelRenderer getArmRenderer(ModelBiped model, EnumHandSide hand) {
 		switch (hand) {
-		case RIGHT: return model.bipedRightArm;
-		case LEFT: return model.bipedLeftArm;
-		default: return null; // This should never happen
+			case RIGHT: return model.bipedRightArm;
+			case LEFT: return model.bipedLeftArm;
+			default: return null; // This should never happen
 		}
 	}
 	

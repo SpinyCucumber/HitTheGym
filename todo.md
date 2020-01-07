@@ -1,0 +1,5 @@
+- [ ] Lifter state client syncing
+- [ ] Muscle groups
+- [ ] Add minimum strengths, muscles and work to exercises
+- [ ] Add Musclelyzer
+- [ ] Add guide

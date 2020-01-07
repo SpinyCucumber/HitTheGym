@@ -5,6 +5,8 @@ import java.io.IOException;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
 import spinyq.hitthegym.common.ExerciseSet;
 import spinyq.hitthegym.common.ILifter;
 import spinyq.hitthegym.common.LifterState;
@@ -61,8 +63,17 @@ public class GuiLift extends GuiScreen {
 		super.mouseClicked(mouseX, mouseY, mouseButton);
 		// Start lifting if left click
 		if (mouseButton == LIFT_BUTTON) {
-			lifterState.lifting = true;
-			lifterState.sendToServer();
+			// Check to see if the player is strong enough
+			// If they are, start lifting.
+			if (lifterState.canUseExercise()) {
+				lifterState.lifting = true;
+				lifterState.sendToServer();
+			}
+			// If not, tell them they are not strong enough
+			else {
+				ITextComponent text = new TextComponentString(lifterState.exercise.getStatusMessage(lifterState.getPlayer()));
+				lifterState.getPlayer().sendStatusMessage(text, true);
+			}
 		}
 		// Cycle exercise if right click
 		if (lifterState.liftProgress == 0.0 && mouseButton == CYCLE_BUTTON) {
@@ -75,9 +86,11 @@ public class GuiLift extends GuiScreen {
 	@Override
 	protected void mouseReleased(int mouseX, int mouseY, int state) {
 		super.mouseReleased(mouseX, mouseY, state);
-		// Stop lifting if left click
-		if (state == LIFT_BUTTON) lifterState.lifting = false;
-		lifterState.sendToServer();
+		// Stop lifting if left click and lifting
+		if (state == LIFT_BUTTON && lifterState.lifting) {
+			lifterState.lifting = false;
+			lifterState.sendToServer();
+		}
 	}
 	
 }
