@@ -1,0 +1,6 @@
+{
+	"lift": {
+		"category": "players",
+		"sounds": [ "hitthegym:lift/0", "hitthegym:lift/1", "hitthegym:lift/2", "hitthegym:lift/3", "hitthegym:lift/4", "hitthegym:lift/5" ]
+	}
+}
