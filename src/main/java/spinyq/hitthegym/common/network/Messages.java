@@ -12,8 +12,8 @@ public class Messages {
 	public static void register()
 	{
 		int id = 0;
-		instance.registerMessage(MessageLifterState.Handler.class, MessageLifterState.class, id++, Side.SERVER);
-		instance.registerMessage(MessageLifterState.Handler.class, MessageLifterState.class, id++, Side.CLIENT);
+		instance.registerMessage(MessageLifterChange.Handler.class, MessageLifterChange.class, id++, Side.SERVER);
+		instance.registerMessage(MessageLifterChange.Handler.class, MessageLifterChange.class, id++, Side.CLIENT);
 	}
 	
 }

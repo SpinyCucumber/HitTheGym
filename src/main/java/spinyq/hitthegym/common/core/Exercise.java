@@ -21,6 +21,7 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.minecraftforge.registries.RegistryBuilder;
 import spinyq.hitthegym.common.HitTheGym;
 import spinyq.hitthegym.common.ModConstants;
+import spinyq.hitthegym.common.capability.IStrengthsCapability;
 
 /**
  * Represents a type of exercise the player can perform (e.g. curls, squats, etc.)
@@ -47,8 +48,19 @@ public abstract class Exercise extends IForgeRegistryEntry.Impl<Exercise> {
 			this.gains = gains;
 		}
 		
+		public void onRep(Strengths strengths) {
+			// Increase strengths
+			gains.forEach((group, amt) -> {
+				strengths.addStrength(group, amt);
+			});
+		}
+		
+		/**
+		 * Increases a player's strength values.
+		 * @param player
+		 */
 		public void onRep(EntityPlayer player) {
-			// TODO
+			onRep(player.getCapability(IStrengthsCapability.CAPABILITY, null).getStrengths());
 		}
 		
 	}
@@ -68,14 +80,6 @@ public abstract class Exercise extends IForgeRegistryEntry.Impl<Exercise> {
 		}
 		
 		/**
-		 * Overload of isMet that retrieves the capability of a player.
-		 */
-		public boolean isMet(EntityPlayer player) {
-			// TODO
-			return true;
-		}
-		
-		/**
 		 * @param strengths
 		 * @return Whether the particular strengths satisfy the requirement
 		 */
@@ -85,14 +89,12 @@ public abstract class Exercise extends IForgeRegistryEntry.Impl<Exercise> {
 			}
 			return true;
 		}
-		
+
 		/**
-		 * @param player
-		 * @return A message to display to the player when they are not strong enough to perform an exercise. If the player is strong enough, returns null.
+		 * Overload of isMet that retrieves the capability of a player.
 		 */
-		public String getStatusMessage(EntityPlayer player) {
-			// TODO
-			return null;
+		public boolean isMet(EntityPlayer player) {
+			return isMet(player.getCapability(IStrengthsCapability.CAPABILITY, null).getStrengths());
 		}
 		
 		public String getStatusMessage(Strengths strengths) {
@@ -102,6 +104,14 @@ public abstract class Exercise extends IForgeRegistryEntry.Impl<Exercise> {
 				}
 			}
 			return null;
+		}
+
+		/**
+		 * @param player
+		 * @return A message to display to the player when they are not strong enough to perform an exercise. If the player is strong enough, returns null.
+		 */
+		public String getStatusMessage(EntityPlayer player) {
+			return getStatusMessage(player.getCapability(IStrengthsCapability.CAPABILITY, null).getStrengths());
 		}
 		
 	}

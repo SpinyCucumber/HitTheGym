@@ -16,7 +16,7 @@ public class GuiLift extends GuiScreen {
 	
 	private static final int LIFT_BUTTON = 0, CYCLE_BUTTON = 1;
 	
-	private Active lifterState;
+	private Active lifter;
 	// The list of exercises to cycle through.
 	private ExerciseSet exercises;
 	// The current exercise.
@@ -28,9 +28,9 @@ public class GuiLift extends GuiScreen {
 		this.exercises = exercises;
 		iExercise = 0;
 		// Start with first exercise
-		lifterState = new Active(exercises.getList().get(iExercise));
-		Minecraft.getMinecraft().player.getCapability(ILifterCapability.CAPABILITY, null).setLifter(lifterState);
-		lifterState.sendToServer();
+		lifter = new Active(exercises.getList().get(iExercise));
+		Minecraft.getMinecraft().player.getCapability(ILifterCapability.CAPABILITY, null).setLifter(lifter);
+		lifter.sendToServer();
 	}
 
 	@Override
@@ -47,7 +47,7 @@ public class GuiLift extends GuiScreen {
 		// Draw bar... first bind texture
 		Minecraft.getMinecraft().getTextureManager().bindTexture(new ResourceLocation("hitthegym:textures/gui.png"));
 		// Draw interior of bar using lift progress
-		int barHeight = (int) (64 * lifterState.liftProgress / lifterState.maxLiftProgress);
+		int barHeight = (int) (64 * lifter.liftProgress / lifter.maxLiftProgress);
 		drawTexturedModalRect(this.width - 32, this.height - barHeight, 32, 64 - barHeight, 32, barHeight);
 		// Draw bar exterior
 		drawTexturedModalRect(this.width - 32, this.height - 64, 0, 0, 32, 64);
@@ -65,21 +65,21 @@ public class GuiLift extends GuiScreen {
 		if (mouseButton == LIFT_BUTTON) {
 			// Check to see if the player is strong enough
 			// If they are, start lifting.
-			if (lifterState.canUseExercise()) {
-				lifterState.lifting = true;
-				lifterState.sendToServer();
+			if (lifter.canUseExercise()) {
+				lifter.lifting = true;
+				lifter.sendToServer();
 			}
 			// If not, tell them they are not strong enough
 			else {
-				ITextComponent text = new TextComponentString(lifterState.exercise.getStatusMessage(lifterState.getPlayer()));
-				lifterState.getPlayer().sendStatusMessage(text, true);
+				ITextComponent text = new TextComponentString(lifter.exercise.getStatusMessage(lifter.getPlayer()));
+				lifter.getPlayer().sendStatusMessage(text, true);
 			}
 		}
 		// Cycle exercise if right click
-		if (lifterState.liftProgress == 0.0 && mouseButton == CYCLE_BUTTON) {
+		if (lifter.liftProgress == 0.0 && mouseButton == CYCLE_BUTTON) {
 			iExercise = (iExercise + 1) % exercises.getList().size();
-			lifterState.exercise = exercises.getList().get(iExercise);
-			lifterState.sendToServer();
+			lifter.exercise = exercises.getList().get(iExercise);
+			lifter.sendToServer();
 		}
 	}
 
@@ -87,9 +87,9 @@ public class GuiLift extends GuiScreen {
 	protected void mouseReleased(int mouseX, int mouseY, int state) {
 		super.mouseReleased(mouseX, mouseY, state);
 		// Stop lifting if left click and lifting
-		if (state == LIFT_BUTTON && lifterState.lifting) {
-			lifterState.lifting = false;
-			lifterState.sendToServer();
+		if (state == LIFT_BUTTON && lifter.lifting) {
+			lifter.lifting = false;
+			lifter.sendToServer();
 		}
 	}
 	

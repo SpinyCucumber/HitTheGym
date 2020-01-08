@@ -16,12 +16,12 @@ import spinyq.hitthegym.common.capability.ILifterCapability;
 import spinyq.hitthegym.common.core.Exercise;
 import spinyq.hitthegym.common.core.Lifter;
 
-public class MessageLifterState implements IMessage {
+public class MessageLifterChange implements IMessage {
 
-	public static class Handler implements IMessageHandler<MessageLifterState, IMessage> {
+	public static class Handler implements IMessageHandler<MessageLifterChange, IMessage> {
 
 		@Override
-		public IMessage onMessage(MessageLifterState message, MessageContext ctx) {
+		public IMessage onMessage(MessageLifterChange message, MessageContext ctx) {
 			// Find world depending on side
 			World world = ctx.side == Side.SERVER ? ctx.getServerHandler().player.world : Minecraft.getMinecraft().world;
 			EntityPlayer player = world.getPlayerEntityByUUID(message.player);
@@ -38,11 +38,11 @@ public class MessageLifterState implements IMessage {
 	public Lifter state;
 	public UUID player;
 	
-	public MessageLifterState() {
+	public MessageLifterChange() {
 		// Default constructor necessary
 	}
 
-	public MessageLifterState(Lifter state) {
+	public MessageLifterChange(Lifter state) {
 		super();
 		this.state = state;
 		this.player = state.getPlayer().getUniqueID();

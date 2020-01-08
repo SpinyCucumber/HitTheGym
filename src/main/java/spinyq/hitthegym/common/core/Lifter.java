@@ -9,7 +9,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import spinyq.hitthegym.client.ModSounds;
-import spinyq.hitthegym.common.network.MessageLifterState;
+import spinyq.hitthegym.common.network.MessageLifterChange;
 import spinyq.hitthegym.common.network.Messages;
 
 /**
@@ -94,7 +94,7 @@ public class Lifter {
 	public void sendToServer() {
 		// DEBUG
 		// HitTheGymMod.log.info("Sending lifter state to server for player {}", getPlayer());
-		Messages.instance.sendToServer(new MessageLifterState(this));
+		Messages.instance.sendToServer(new MessageLifterChange(this));
 	}
 	
 	public static class Active extends Lifter {
