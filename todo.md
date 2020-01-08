@@ -1,6 +1,8 @@
 - [ ] Lifter state client syncing
 - [x] Muscle groups
-- [ ] Add minimum strengths, muscles and work to exercises
+- [x] Add minimum strengths, muscles and work to exercises
 - [ ] Add Musclelyzer
 - [ ] Add guide
-- [ ] Add strength capability
+- [x] Add strength capability
+- [ ] Hookup tick handler to the exercise rep handler
+- [ ] Add utility commands
