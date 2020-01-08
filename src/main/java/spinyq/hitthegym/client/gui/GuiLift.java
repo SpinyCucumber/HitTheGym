@@ -1,4 +1,4 @@
-package spinyq.hitthegym.client;
+package spinyq.hitthegym.client.gui;
 
 import java.io.IOException;
 
@@ -7,10 +7,10 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
-import spinyq.hitthegym.common.ExerciseSet;
-import spinyq.hitthegym.common.ILifter;
-import spinyq.hitthegym.common.LifterState;
-import spinyq.hitthegym.common.LifterState.Active;
+import spinyq.hitthegym.common.capability.ILifter;
+import spinyq.hitthegym.common.core.ExerciseSet;
+import spinyq.hitthegym.common.core.LifterState;
+import spinyq.hitthegym.common.core.LifterState.Active;
 
 public class GuiLift extends GuiScreen {
 	

@@ -8,8 +8,8 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
 import net.minecraft.world.World;
-import spinyq.hitthegym.client.GuiLift;
-import spinyq.hitthegym.common.ExerciseSet;
+import spinyq.hitthegym.client.gui.GuiLift;
+import spinyq.hitthegym.common.core.ExerciseSet;
 
 public abstract class ItemWeight extends Item {
 

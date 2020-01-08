@@ -3,9 +3,11 @@ package spinyq.hitthegym.common.item;
 import com.google.common.collect.ImmutableList;
 
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.model.ModelLoader;
-import spinyq.hitthegym.common.Exercise;
-import spinyq.hitthegym.common.ExerciseSet;
+import spinyq.hitthegym.common.ModConstants;
+import spinyq.hitthegym.common.core.Exercise;
+import spinyq.hitthegym.common.core.ExerciseSet;
 
 public class ItemDumbell extends ItemWeight {
 	
@@ -13,7 +15,7 @@ public class ItemDumbell extends ItemWeight {
 	
 	public ItemDumbell() {
 		// Set registry name
-		setRegistryName("dumbbell");
+		setRegistryName(new ResourceLocation(ModConstants.MODID, "dumbbell"));
 		setUnlocalizedName("dumbell");
 		setMaxStackSize(1);
 	}

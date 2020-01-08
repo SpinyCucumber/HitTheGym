@@ -2,11 +2,9 @@ package spinyq.hitthegym.client;
 
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.entity.Entity;
-import spinyq.hitthegym.common.ILifter;
+import spinyq.hitthegym.common.capability.ILifter;
 
 public class RenderHandler {
-	
-	public static final RenderHandler instance = new RenderHandler();
 	
 	public static void setRotationAngles(Entity entity) {
 		if (entity instanceof AbstractClientPlayer) {

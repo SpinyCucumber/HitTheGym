@@ -1,4 +1,4 @@
-package spinyq.hitthegym.common;
+package spinyq.hitthegym.common.core;
 
 public enum MuscleGroup {
 	

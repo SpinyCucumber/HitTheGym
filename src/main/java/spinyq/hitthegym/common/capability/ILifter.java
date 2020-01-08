@@ -1,4 +1,4 @@
-package spinyq.hitthegym.common;
+package spinyq.hitthegym.common.capability;
 
 import java.util.concurrent.Callable;
 
@@ -14,6 +14,11 @@ import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent.PlayerTickEvent;
+import spinyq.hitthegym.common.HitTheGym;
+import spinyq.hitthegym.common.ModConstants;
+import spinyq.hitthegym.common.core.LifterState;
 
 /**
  * A forge capability that is attached to all players. Contains the lifter state.
@@ -33,7 +38,7 @@ public interface ILifter {
 	@CapabilityInject(ILifter.class)
 	public static final Capability<ILifter> CAPABILITY = null;
 	// Used when attaching the capability to players.
-	public static final ResourceLocation KEY = new ResourceLocation(HitTheGymMod.MODID, "lifter");
+	public static final ResourceLocation KEY = new ResourceLocation(ModConstants.MODID, "lifter");
 	
 	public static class Impl implements ILifter {
 
@@ -101,7 +106,7 @@ public interface ILifter {
 			if (event.getObject() instanceof EntityPlayer) {
 				EntityPlayer player = (EntityPlayer) event.getObject();
 				// DEBUG
-				HitTheGymMod.log.info("Attaching Lifter Capability to player {}", player);
+				HitTheGym.log.info("Attaching Lifter Capability to player {}", player);
 				event.addCapability(KEY, new Provider(player));
 			}
 		}
@@ -136,6 +141,27 @@ public interface ILifter {
 		
 	}
 	
+	/**
+	 * Handles increasing the player's lift progress if they are lifting.
+	 * @author spinyq
+	 *
+	 */
+	@Mod.EventBusSubscriber
+	public static class LiftHandler {
+		
+		@SubscribeEvent
+		public static void onPlayerTick(PlayerTickEvent event) {
+			// Only update once per tick
+			if (event.phase == TickEvent.Phase.END) return;
+			// Get lifter state and update
+			event.player.getCapability(ILifter.CAPABILITY, null).getState().tick();
+		}
+		
+	}
+	
+	/**
+	 * Called during preInit
+	 */
 	public static void register() {
 		CapabilityManager.INSTANCE.register(ILifter.class, new Storage(), new Factory());
 	}

@@ -5,9 +5,9 @@ import com.google.common.collect.ImmutableList;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.model.ModelLoader;
-import spinyq.hitthegym.common.Exercise;
-import spinyq.hitthegym.common.ExerciseSet;
-import spinyq.hitthegym.common.HitTheGymMod;
+import spinyq.hitthegym.common.ModConstants;
+import spinyq.hitthegym.common.core.Exercise;
+import spinyq.hitthegym.common.core.ExerciseSet;
 
 public class ItemBarbell extends ItemWeight {
 
@@ -16,7 +16,7 @@ public class ItemBarbell extends ItemWeight {
 	public ItemBarbell() {
 		super();
 		// Set registry name
-		this.setRegistryName(new ResourceLocation(HitTheGymMod.MODID, "barbell"));
+		this.setRegistryName(new ResourceLocation(ModConstants.MODID, "barbell"));
 		this.setUnlocalizedName("barbell");
 		this.setMaxStackSize(1);
 	}

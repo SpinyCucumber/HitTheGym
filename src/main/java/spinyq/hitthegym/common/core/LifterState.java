@@ -1,4 +1,4 @@
-package spinyq.hitthegym.common;
+package spinyq.hitthegym.common.core;
 
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.entity.player.EntityPlayer;
@@ -8,7 +8,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
-import spinyq.hitthegym.client.Sounds;
+import spinyq.hitthegym.client.ModSounds;
 import spinyq.hitthegym.common.network.MessageLifterState;
 import spinyq.hitthegym.common.network.Messages;
 
@@ -22,7 +22,7 @@ import spinyq.hitthegym.common.network.Messages;
 public class LifterState {
 	
 	/**
-	 * Used in networking
+	 * Used in networking to differentiate between types
 	 */
 	public static enum Enum {
 		IDLE, ACTIVE;
@@ -159,7 +159,7 @@ public class LifterState {
 				World world = getPlayer().world;
 				if (timer % 40 == 0) {
 					Vec3d pos = getPlayer().getPositionEyes(0);
-					world.playSound(null, pos.x, pos.y, pos.z, Sounds.lift, SoundCategory.VOICE, 1.0f, 1.0f);
+					world.playSound(null, pos.x, pos.y, pos.z, ModSounds.lift, SoundCategory.VOICE, 1.0f, 1.0f);
 				}
 			}
 			// ONLY ON THE CLIENT, spawn some particles every so often.

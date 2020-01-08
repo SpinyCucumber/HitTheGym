@@ -3,11 +3,11 @@ package spinyq.hitthegym.common.network;
 import net.minecraftforge.fml.common.network.NetworkRegistry;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;
-import spinyq.hitthegym.common.HitTheGymMod;
+import spinyq.hitthegym.common.ModConstants;
 
 public class Messages {
 
-	public static final SimpleNetworkWrapper instance = NetworkRegistry.INSTANCE.newSimpleChannel(HitTheGymMod.MODID);
+	public static final SimpleNetworkWrapper instance = NetworkRegistry.INSTANCE.newSimpleChannel(ModConstants.MODID);
 	
 	public static void register()
 	{

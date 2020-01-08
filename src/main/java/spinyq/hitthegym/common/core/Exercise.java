@@ -1,4 +1,4 @@
-package spinyq.hitthegym.common;
+package spinyq.hitthegym.common.core;
 
 import com.google.common.collect.ImmutableMap;
 
@@ -17,6 +17,8 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.minecraftforge.registries.RegistryBuilder;
+import spinyq.hitthegym.common.HitTheGym;
+import spinyq.hitthegym.common.ModConstants;
 
 /**
  * Represents a type of exercise the player can perform (e.g. curls, squats, etc.)
@@ -118,7 +120,7 @@ public abstract class Exercise extends IForgeRegistryEntry.Impl<Exercise> {
 	private RepResult result;
 	private StrengthRequirement requirement;
 	
-	public static Exercise CURL = new Exercise(new ResourceLocation(HitTheGymMod.MODID, "curl"),
+	public static Exercise CURL = new Exercise(new ResourceLocation(ModConstants.MODID, "curl"),
 			new RepResult(ImmutableMap.of(MuscleGroup.BICEP, 1.0)),
 			new StrengthRequirement(ImmutableMap.of())) {
 		@Override
@@ -130,7 +132,7 @@ public abstract class Exercise extends IForgeRegistryEntry.Impl<Exercise> {
 		
 	};
 	
-	public static Exercise LATERAL = new Exercise(new ResourceLocation(HitTheGymMod.MODID, "lateral"),
+	public static Exercise LATERAL = new Exercise(new ResourceLocation(ModConstants.MODID, "lateral"),
 			new RepResult(ImmutableMap.of(MuscleGroup.DELTOID, 1.0)),
 			new StrengthRequirement(ImmutableMap.of(MuscleGroup.BICEP, 20.0))) {
 		@Override
@@ -143,7 +145,7 @@ public abstract class Exercise extends IForgeRegistryEntry.Impl<Exercise> {
 		
 	};
 	
-	public static Exercise SQUAT = new Exercise(new ResourceLocation(HitTheGymMod.MODID, "squat"),
+	public static Exercise SQUAT = new Exercise(new ResourceLocation(ModConstants.MODID, "squat"),
 			new RepResult(ImmutableMap.of(MuscleGroup.GLUTEAL, 1.0)),
 			new StrengthRequirement(ImmutableMap.of())) {
 		@Override
@@ -196,10 +198,10 @@ public abstract class Exercise extends IForgeRegistryEntry.Impl<Exercise> {
 		
 		@SubscribeEvent
 		public static void newRegistry(RegistryEvent.NewRegistry event) {
-			HitTheGymMod.log.info("Creating exercise registry...");
+			HitTheGym.log.info("Creating exercise registry...");
 			RegistryBuilder<Exercise> builder = new RegistryBuilder<Exercise>();
 			builder.setType(Exercise.class);
-			builder.setName(new ResourceLocation(HitTheGymMod.MODID, "exercises"));
+			builder.setName(new ResourceLocation(ModConstants.MODID, "exercises"));
 			builder.create();
 		}
 

@@ -12,9 +12,9 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
-import spinyq.hitthegym.common.Exercise;
-import spinyq.hitthegym.common.ILifter;
-import spinyq.hitthegym.common.LifterState;
+import spinyq.hitthegym.common.capability.ILifter;
+import spinyq.hitthegym.common.core.Exercise;
+import spinyq.hitthegym.common.core.LifterState;
 
 public class MessageLifterState implements IMessage {
 
