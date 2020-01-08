@@ -13,7 +13,7 @@ import spinyq.hitthegym.common.network.MessageLifterState;
 import spinyq.hitthegym.common.network.Messages;
 
 /**
- * Represents the state of a lifter...
+ * The state of a "lifter"
  * Lifters can be idle (i.e. not in the lift GUI)
  * or active (i.e. in the lift GUI)
  * @author spinyq
@@ -153,6 +153,7 @@ public class LifterState {
 			liftProgress = lifting ? Math.min(liftProgress + liftRate / 20.0, maxLiftProgress)
 					: Math.max(liftProgress - dropRate / 20.0, 0.0);
 			// ONLY ON THE SERVER, play some sound effects every so often.
+			// This way sound is synchronized.
 			if (!getPlayer().world.isRemote && lifting) {
 				// Update timer
 				timer++;

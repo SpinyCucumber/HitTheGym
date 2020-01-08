@@ -1,5 +1,7 @@
 package spinyq.hitthegym.common.core;
 
+import java.util.Map;
+
 import com.google.common.collect.ImmutableMap;
 
 import net.minecraft.client.Minecraft;
@@ -65,8 +67,22 @@ public abstract class Exercise extends IForgeRegistryEntry.Impl<Exercise> {
 			this.requirements = requirements;
 		}
 		
+		/**
+		 * Overload of isMet that retrieves the capability of a player.
+		 */
 		public boolean isMet(EntityPlayer player) {
 			// TODO
+			return true;
+		}
+		
+		/**
+		 * @param strengths
+		 * @return Whether the particular strengths satisfy the requirement
+		 */
+		public boolean isMet(StrengthState strengths) {
+			for (Map.Entry<MuscleGroup, Double> entry : requirements.entrySet()) {
+				if (strengths.getStrength(entry.getKey()) < entry.getValue()) return false;
+			}
 			return true;
 		}
 		

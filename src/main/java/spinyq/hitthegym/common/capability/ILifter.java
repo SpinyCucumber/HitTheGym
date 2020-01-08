@@ -38,7 +38,7 @@ public interface ILifter {
 	@CapabilityInject(ILifter.class)
 	public static final Capability<ILifter> CAPABILITY = null;
 	// Used when attaching the capability to players.
-	public static final ResourceLocation KEY = new ResourceLocation(ModConstants.MODID, "lifter");
+	public static final ResourceLocation ID = new ResourceLocation(ModConstants.MODID, "lifter");
 	
 	public static class Impl implements ILifter {
 
@@ -107,7 +107,7 @@ public interface ILifter {
 				EntityPlayer player = (EntityPlayer) event.getObject();
 				// DEBUG
 				HitTheGym.log.info("Attaching Lifter Capability to player {}", player);
-				event.addCapability(KEY, new Provider(player));
+				event.addCapability(ID, new Provider(player));
 			}
 		}
 		
