@@ -7,10 +7,10 @@ import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
-import spinyq.hitthegym.common.capability.ILifter;
+import spinyq.hitthegym.common.capability.ILifterCapability;
 import spinyq.hitthegym.common.core.ExerciseSet;
-import spinyq.hitthegym.common.core.LifterState;
-import spinyq.hitthegym.common.core.LifterState.Active;
+import spinyq.hitthegym.common.core.Lifter;
+import spinyq.hitthegym.common.core.Lifter.Active;
 
 public class GuiLift extends GuiScreen {
 	
@@ -29,15 +29,15 @@ public class GuiLift extends GuiScreen {
 		iExercise = 0;
 		// Start with first exercise
 		lifterState = new Active(exercises.getList().get(iExercise));
-		Minecraft.getMinecraft().player.getCapability(ILifter.CAPABILITY, null).setState(lifterState);
+		Minecraft.getMinecraft().player.getCapability(ILifterCapability.CAPABILITY, null).setState(lifterState);
 		lifterState.sendToServer();
 	}
 
 	@Override
 	public void onGuiClosed() {
 		// When GUI is closed, set lifter state back to idle
-		LifterState newState = new LifterState();
-		Minecraft.getMinecraft().player.getCapability(ILifter.CAPABILITY, null).setState(newState);
+		Lifter newState = new Lifter();
+		Minecraft.getMinecraft().player.getCapability(ILifterCapability.CAPABILITY, null).setState(newState);
 		newState.sendToServer();
 	}
 

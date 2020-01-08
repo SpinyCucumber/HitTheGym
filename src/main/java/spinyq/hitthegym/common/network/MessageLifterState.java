@@ -12,9 +12,9 @@ import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.common.registry.GameRegistry;
 import net.minecraftforge.fml.relauncher.Side;
-import spinyq.hitthegym.common.capability.ILifter;
+import spinyq.hitthegym.common.capability.ILifterCapability;
 import spinyq.hitthegym.common.core.Exercise;
-import spinyq.hitthegym.common.core.LifterState;
+import spinyq.hitthegym.common.core.Lifter;
 
 public class MessageLifterState implements IMessage {
 
@@ -28,21 +28,21 @@ public class MessageLifterState implements IMessage {
 			// Give the new state a reference to the player
 			message.state.setPlayer(player);
 			// Get state and update with new one
-			player.getCapability(ILifter.CAPABILITY, null).setState(message.state);
+			player.getCapability(ILifterCapability.CAPABILITY, null).setState(message.state);
 			// Don't reply
 			return null;
 		}
 		
 	}
 	
-	public LifterState state;
+	public Lifter state;
 	public UUID player;
 	
 	public MessageLifterState() {
 		// Default constructor necessary
 	}
 
-	public MessageLifterState(LifterState state) {
+	public MessageLifterState(Lifter state) {
 		super();
 		this.state = state;
 		this.player = state.getPlayer().getUniqueID();
@@ -53,16 +53,16 @@ public class MessageLifterState implements IMessage {
 		// Read UUID
 		player = new UUID(buf.readLong(), buf.readLong());
 		// Read state type
-		LifterState.Enum type = LifterState.Enum.values()[buf.readInt()];
+		Lifter.Enum type = Lifter.Enum.values()[buf.readInt()];
 		// Only care about active states
-		if (type == LifterState.Enum.ACTIVE) {
+		if (type == Lifter.Enum.ACTIVE) {
 			// Read exercise
-			LifterState.Active active = new LifterState.Active(ByteBufUtils.readRegistryEntry(buf, GameRegistry.findRegistry(Exercise.class)));
+			Lifter.Active active = new Lifter.Active(ByteBufUtils.readRegistryEntry(buf, GameRegistry.findRegistry(Exercise.class)));
 			// Read lifting
 			active.lifting = buf.readBoolean();
 			state = active;
-		} else if (type == LifterState.Enum.IDLE) {
-			state = new LifterState();
+		} else if (type == Lifter.Enum.IDLE) {
+			state = new Lifter();
 		}
 	}
 
@@ -74,8 +74,8 @@ public class MessageLifterState implements IMessage {
 		// Write state type
 		buf.writeInt(state.getEnum().ordinal());
 		// If state is active, write some more stuff
-		if (state instanceof LifterState.Active) {
-			LifterState.Active active = (LifterState.Active) state;
+		if (state instanceof Lifter.Active) {
+			Lifter.Active active = (Lifter.Active) state;
 			// Write exercise
 			ByteBufUtils.writeRegistryEntry(buf, active.exercise);
 			// Write lifting

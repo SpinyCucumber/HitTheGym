@@ -79,7 +79,7 @@ public abstract class Exercise extends IForgeRegistryEntry.Impl<Exercise> {
 		 * @param strengths
 		 * @return Whether the particular strengths satisfy the requirement
 		 */
-		public boolean isMet(StrengthState strengths) {
+		public boolean isMet(Strengths strengths) {
 			for (Map.Entry<MuscleGroup, Double> entry : requirements.entrySet()) {
 				if (strengths.getStrength(entry.getKey()) < entry.getValue()) return false;
 			}
@@ -95,7 +95,7 @@ public abstract class Exercise extends IForgeRegistryEntry.Impl<Exercise> {
 			return null;
 		}
 		
-		public String getStatusMessage(StrengthState strengths) {
+		public String getStatusMessage(Strengths strengths) {
 			for (Map.Entry<MuscleGroup, Double> entry : requirements.entrySet()) {
 				if (strengths.getStrength(entry.getKey()) < entry.getValue()) {
 					return String.format("Your {} are not strong enough to perform this exercise.", entry.getKey().getPluralName());

@@ -19,7 +19,7 @@ import spinyq.hitthegym.common.network.Messages;
  * @author spinyq
  *
  */
-public class LifterState {
+public class Lifter {
 	
 	/**
 	 * Used in networking to differentiate between types
@@ -84,7 +84,7 @@ public class LifterState {
 	 * Updates a lifter state using another
 	 * @param other
 	 */
-	public void update(LifterState other) {
+	public void update(Lifter other) {
 		// By default do nothing
 	}
 	
@@ -97,7 +97,7 @@ public class LifterState {
 		Messages.instance.sendToServer(new MessageLifterState(this));
 	}
 	
-	public static class Active extends LifterState {
+	public static class Active extends Lifter {
 		
 		public Exercise exercise; // When active, lifters are performing a specific exercise
 		public double liftProgress; // When active lifters also have a certain position in their rep
@@ -129,7 +129,7 @@ public class LifterState {
 		}
 
 		@Override
-		public void update(LifterState other) {
+		public void update(Lifter other) {
 			super.update(other);
 			if (other instanceof Active) {
 				exercise = ((Active) other).exercise;

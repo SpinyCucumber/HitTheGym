@@ -18,43 +18,43 @@ import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent.PlayerTickEvent;
 import spinyq.hitthegym.common.HitTheGym;
 import spinyq.hitthegym.common.ModConstants;
-import spinyq.hitthegym.common.core.LifterState;
+import spinyq.hitthegym.common.core.Lifter;
 
 /**
  * A forge capability that is attached to all players. Contains the lifter state.
  * @author spinyq
  *
  */
-public interface ILifter {
+public interface ILifterCapability {
 	
-	LifterState getState();
+	Lifter getState();
 	
 	/**
 	 * Sets the state, and calls handlers.
 	 * @param state
 	 */
-	void setState(LifterState state);
+	void setState(Lifter state);
 	
-	@CapabilityInject(ILifter.class)
-	public static final Capability<ILifter> CAPABILITY = null;
+	@CapabilityInject(ILifterCapability.class)
+	public static final Capability<ILifterCapability> CAPABILITY = null;
 	// Used when attaching the capability to players.
 	public static final ResourceLocation ID = new ResourceLocation(ModConstants.MODID, "lifter");
 	
-	public static class Impl implements ILifter {
+	public static class Impl implements ILifterCapability {
 
-		private LifterState state;
+		private Lifter state;
 		
-		public Impl(LifterState state) {
+		public Impl(Lifter state) {
 			this.state = state;
 		}
 
 		@Override
-		public LifterState getState() {
+		public Lifter getState() {
 			return state;
 		}
 
 		@Override
-		public void setState(LifterState state) {
+		public void setState(Lifter state) {
 			if (this.state != null) this.state.onRemove();
 			// Copy the player reference
 			state.setPlayer(this.state.getPlayer());
@@ -71,11 +71,11 @@ public interface ILifter {
 	 */
 	public static class Provider implements ICapabilityProvider {
 
-		private ILifter instance;
+		private ILifterCapability instance;
 		
 		public Provider(EntityPlayer player) {
 			// Initialize instance and pass reference to player
-			LifterState state = new LifterState();
+			Lifter state = new Lifter();
 			state.setPlayer(player);
 			instance = new Impl(state);
 		}
@@ -118,24 +118,24 @@ public interface ILifter {
 	 * @author spinyq
 	 *
 	 */
-	public static class Factory implements Callable<ILifter> {
+	public static class Factory implements Callable<ILifterCapability> {
 
 		@Override
-		public ILifter call() throws Exception {
-			return new Impl(new LifterState());
+		public ILifterCapability call() throws Exception {
+			return new Impl(new Lifter());
 		}
 		
 	}
 	
-	public static class Storage implements Capability.IStorage<ILifter> {
+	public static class Storage implements Capability.IStorage<ILifterCapability> {
 
 		@Override
-		public NBTBase writeNBT(Capability<ILifter> capability, ILifter instance, EnumFacing side) {
+		public NBTBase writeNBT(Capability<ILifterCapability> capability, ILifterCapability instance, EnumFacing side) {
 			return null; // Do nothing
 		}
 
 		@Override
-		public void readNBT(Capability<ILifter> capability, ILifter instance, EnumFacing side, NBTBase nbt) {
+		public void readNBT(Capability<ILifterCapability> capability, ILifterCapability instance, EnumFacing side, NBTBase nbt) {
 			// Do nothing
 		}
 		
@@ -154,7 +154,7 @@ public interface ILifter {
 			// Only update once per tick
 			if (event.phase == TickEvent.Phase.END) return;
 			// Get lifter state and update
-			event.player.getCapability(ILifter.CAPABILITY, null).getState().tick();
+			event.player.getCapability(ILifterCapability.CAPABILITY, null).getState().tick();
 		}
 		
 	}
@@ -163,7 +163,7 @@ public interface ILifter {
 	 * Called during preInit
 	 */
 	public static void register() {
-		CapabilityManager.INSTANCE.register(ILifter.class, new Storage(), new Factory());
+		CapabilityManager.INSTANCE.register(ILifterCapability.class, new Storage(), new Factory());
 	}
 	
 }

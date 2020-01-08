@@ -12,11 +12,11 @@ import net.minecraftforge.common.util.INBTSerializable;
  * @author SpinyQ
  *
  */
-public class StrengthState implements INBTSerializable<NBTTagCompound> {
+public class Strengths implements INBTSerializable<NBTTagCompound> {
 
 	private Map<MuscleGroup, Double> strengths;
 
-	public StrengthState() {
+	public Strengths() {
 		// Create empty map
 		strengths = new HashMap<>();
 	}
