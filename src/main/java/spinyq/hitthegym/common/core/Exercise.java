@@ -88,10 +88,19 @@ public abstract class Exercise extends IForgeRegistryEntry.Impl<Exercise> {
 		
 		/**
 		 * @param player
-		 * @return A message to display to the player when they are not strong enough to perform an exercise.
+		 * @return A message to display to the player when they are not strong enough to perform an exercise. If the player is strong enough, returns null.
 		 */
 		public String getStatusMessage(EntityPlayer player) {
 			// TODO
+			return null;
+		}
+		
+		public String getStatusMessage(StrengthState strengths) {
+			for (Map.Entry<MuscleGroup, Double> entry : requirements.entrySet()) {
+				if (strengths.getStrength(entry.getKey()) < entry.getValue()) {
+					return String.format("Your {} are not strong enough to perform this exercise.", entry.getKey().getPluralName());
+				}
+			}
 			return null;
 		}
 		
