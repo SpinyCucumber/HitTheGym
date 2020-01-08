@@ -32,6 +32,12 @@ minecraft {
     // makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
 }
 
+repositories {
+	maven {
+    	url "https://libraries.minecraft.net"
+	}
+}
+
 runClient {
     jvmArgs "-Dfml.coreMods.load=spinyq.hitthegym.common.asm.LoadingPlugin"
 }
@@ -57,6 +63,7 @@ dependencies {
     // for more info...
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
+    compile 'com.mojang:brigadier:1.0.17'
 }
 
 processResources {

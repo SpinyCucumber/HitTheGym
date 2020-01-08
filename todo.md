@@ -5,5 +5,6 @@
 - [ ] Add guide
 - [x] Add strength capability
 - [ ] Hookup tick handler to the exercise rep handler
-- [ ] Add utility commands
+- [ ] Add utility commands (Use Mojang's Brigadier)
 - [ ] Add strengths changed message (server -> client)
+- [ ] Use MC 1.15
