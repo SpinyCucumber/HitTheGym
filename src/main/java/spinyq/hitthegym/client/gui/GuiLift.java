@@ -29,7 +29,7 @@ public class GuiLift extends GuiScreen {
 		iExercise = 0;
 		// Start with first exercise
 		lifterState = new Active(exercises.getList().get(iExercise));
-		Minecraft.getMinecraft().player.getCapability(ILifterCapability.CAPABILITY, null).setState(lifterState);
+		Minecraft.getMinecraft().player.getCapability(ILifterCapability.CAPABILITY, null).setLifter(lifterState);
 		lifterState.sendToServer();
 	}
 
@@ -37,7 +37,7 @@ public class GuiLift extends GuiScreen {
 	public void onGuiClosed() {
 		// When GUI is closed, set lifter state back to idle
 		Lifter newState = new Lifter();
-		Minecraft.getMinecraft().player.getCapability(ILifterCapability.CAPABILITY, null).setState(newState);
+		Minecraft.getMinecraft().player.getCapability(ILifterCapability.CAPABILITY, null).setLifter(newState);
 		newState.sendToServer();
 	}
 

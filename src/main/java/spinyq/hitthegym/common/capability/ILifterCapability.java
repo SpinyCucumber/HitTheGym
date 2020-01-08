@@ -27,39 +27,40 @@ import spinyq.hitthegym.common.core.Lifter;
  */
 public interface ILifterCapability {
 	
-	Lifter getState();
+	Lifter getLifter();
 	
 	/**
 	 * Sets the state, and calls handlers.
-	 * @param state
+	 * @param lifter
 	 */
-	void setState(Lifter state);
+	void setLifter(Lifter lifter);
 	
 	@CapabilityInject(ILifterCapability.class)
 	public static final Capability<ILifterCapability> CAPABILITY = null;
+	
 	// Used when attaching the capability to players.
-	public static final ResourceLocation ID = new ResourceLocation(ModConstants.MODID, "lifter");
+	public static final ResourceLocation RESOURCE_LOCATION = new ResourceLocation(ModConstants.MODID, "lifter");
 	
 	public static class Impl implements ILifterCapability {
 
-		private Lifter state;
+		private Lifter lifter;
 		
 		public Impl(Lifter state) {
-			this.state = state;
+			this.lifter = state;
 		}
 
 		@Override
-		public Lifter getState() {
-			return state;
+		public Lifter getLifter() {
+			return lifter;
 		}
 
 		@Override
-		public void setState(Lifter state) {
-			if (this.state != null) this.state.onRemove();
+		public void setLifter(Lifter lifter) {
+			if (this.lifter != null) this.lifter.onRemove();
 			// Copy the player reference
-			state.setPlayer(this.state.getPlayer());
-			this.state = state;
-			this.state.onAdd();
+			lifter.setPlayer(this.lifter.getPlayer());
+			this.lifter = lifter;
+			this.lifter.onAdd();
 		}
 		
 	}
@@ -75,9 +76,9 @@ public interface ILifterCapability {
 		
 		public Provider(EntityPlayer player) {
 			// Initialize instance and pass reference to player
-			Lifter state = new Lifter();
-			state.setPlayer(player);
-			instance = new Impl(state);
+			Lifter lifter = new Lifter();
+			lifter.setPlayer(player);
+			instance = new Impl(lifter);
 		}
 
 		@Override
@@ -93,7 +94,7 @@ public interface ILifterCapability {
 	}
 	
 	/**
-	 * Handles attaching the capability to players. Must be initialized.
+	 * Handles attaching the capability to players.
 	 * @author spinyq
 	 *
 	 */
@@ -107,7 +108,7 @@ public interface ILifterCapability {
 				EntityPlayer player = (EntityPlayer) event.getObject();
 				// DEBUG
 				HitTheGym.log.info("Attaching Lifter Capability to player {}", player);
-				event.addCapability(ID, new Provider(player));
+				event.addCapability(RESOURCE_LOCATION, new Provider(player));
 			}
 		}
 		
@@ -147,14 +148,14 @@ public interface ILifterCapability {
 	 *
 	 */
 	@Mod.EventBusSubscriber
-	public static class LiftHandler {
+	public static class TickHandler {
 		
 		@SubscribeEvent
 		public static void onPlayerTick(PlayerTickEvent event) {
 			// Only update once per tick
 			if (event.phase == TickEvent.Phase.END) return;
 			// Get lifter state and update
-			event.player.getCapability(ILifterCapability.CAPABILITY, null).getState().tick();
+			event.player.getCapability(ILifterCapability.CAPABILITY, null).getLifter().tick();
 		}
 		
 	}

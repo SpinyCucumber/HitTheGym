@@ -28,7 +28,7 @@ public class MessageLifterState implements IMessage {
 			// Give the new state a reference to the player
 			message.state.setPlayer(player);
 			// Get state and update with new one
-			player.getCapability(ILifterCapability.CAPABILITY, null).setState(message.state);
+			player.getCapability(ILifterCapability.CAPABILITY, null).setLifter(message.state);
 			// Don't reply
 			return null;
 		}
