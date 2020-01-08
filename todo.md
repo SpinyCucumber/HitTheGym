@@ -6,3 +6,4 @@
 - [x] Add strength capability
 - [ ] Hookup tick handler to the exercise rep handler
 - [ ] Add utility commands
+- [ ] Add strengths changed message (server -> client)
