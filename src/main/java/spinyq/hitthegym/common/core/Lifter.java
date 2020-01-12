@@ -8,7 +8,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import spinyq.hitthegym.client.ModSounds;
+import spinyq.hitthegym.common.ModSounds;
 import spinyq.hitthegym.common.network.MessageLifterChange;
 import spinyq.hitthegym.common.network.Messages;
 

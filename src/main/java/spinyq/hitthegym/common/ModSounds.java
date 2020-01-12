@@ -1,4 +1,4 @@
-package spinyq.hitthegym.client;
+package spinyq.hitthegym.common;
 
 import com.google.common.collect.ImmutableList;
 
@@ -8,7 +8,6 @@ import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
-import spinyq.hitthegym.common.ModConstants;
 
 /**
  * Handles managing and registering all of the mod sounds.
