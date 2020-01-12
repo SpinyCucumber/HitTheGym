@@ -1,13 +1,13 @@
 package spinyq.hitthegym.common.core;
 
-import net.minecraft.client.entity.AbstractClientPlayer;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.particles.ParticleTypes;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import spinyq.hitthegym.client.ModSounds;
 import spinyq.hitthegym.common.network.MessageLifterChange;
 import spinyq.hitthegym.common.network.Messages;
@@ -24,31 +24,31 @@ public class Lifter {
 	/**
 	 * Used in networking to differentiate between types
 	 */
-	public static enum Enum {
+	public static enum Type {
 		IDLE, ACTIVE;
 	}
 
 	/**
 	 * A reference to the player this state is attached to
 	 */
-	private EntityPlayer player;
+	private PlayerEntity player;
 	
 	/**
 	 * @return The player that this state is attached to
 	 */
-	public EntityPlayer getPlayer() {
+	public PlayerEntity getPlayer() {
 		return player;
 	}
 	
-	public void setPlayer(EntityPlayer player) {
+	public void setPlayer(PlayerEntity player) {
 		this.player = player;
 	}
 	
 	/**
 	 * Called during player rendering to set a player's arms' rotation, etc.
-	 * @param player
+	 * @param playerID
 	 */
-	@SideOnly(Side.CLIENT)
+	@OnlyIn(Dist.CLIENT)
 	public void animate() {
 		// By default do nothing
 	}
@@ -67,14 +67,14 @@ public class Lifter {
 		// Do nothing
 	}
 	
-	public Enum getEnum() {
+	public Type getType() {
 		// By default idling
-		return Enum.IDLE;
+		return Type.IDLE;
 	}
 	
 	/**
 	 * Called every tick (server-side and client-side)
-	 * @param player
+	 * @param playerID
 	 */
 	public void tick() {
 		// By default do nothing
@@ -92,9 +92,7 @@ public class Lifter {
 	 * Notifies the server that this lifter state has changed and updates it.
 	 */
 	public void sendToServer() {
-		// DEBUG
-		// HitTheGymMod.log.info("Sending lifter state to server for player {}", getPlayer());
-		Messages.instance.sendToServer(new MessageLifterChange(this));
+		Messages.CHANNEL.sendToServer(new MessageLifterChange(this));
 	}
 	
 	public static class Active extends Lifter {
@@ -110,22 +108,15 @@ public class Lifter {
 			this.liftProgress = 0.0;
 			lifting = false;
 		}
-		
-		/**
-		 * @return Wheter or not the attached player can use the current exercise.
-		 */
-		public boolean canUseExercise() {
-			return exercise.canUse(getPlayer());
-		}
 
 		@Override
 		public void animate() {
-			exercise.animate((AbstractClientPlayer) getPlayer(), liftProgress);
+			exercise.animate((AbstractClientPlayerEntity) getPlayer(), liftProgress);
 		}
 
 		@Override
-		public Enum getEnum() {
-			return Enum.ACTIVE;
+		public Type getType() {
+			return Type.ACTIVE;
 		}
 
 		@Override
@@ -159,8 +150,8 @@ public class Lifter {
 				timer++;
 				World world = getPlayer().world;
 				if (timer % 40 == 0) {
-					Vec3d pos = getPlayer().getPositionEyes(0);
-					world.playSound(null, pos.x, pos.y, pos.z, ModSounds.lift, SoundCategory.VOICE, 1.0f, 1.0f);
+					Vec3d pos = getPlayer().getEyePosition(0);
+					world.playSound(null, pos.x, pos.y, pos.z, ModSounds.LIFT, SoundCategory.VOICE, 1.0f, 1.0f);
 				}
 			}
 			// ONLY ON THE CLIENT, spawn some particles every so often.
@@ -169,8 +160,8 @@ public class Lifter {
 				timer++;
 				World world = getPlayer().world;
 				if (timer % 5 == 0) {
-					Vec3d pos = getPlayer().getPositionEyes(0);
-					world.spawnParticle(EnumParticleTypes.WATER_SPLASH, pos.x, pos.y, pos.z, 5, 5, 5);
+					Vec3d pos = getPlayer().getEyePosition(0);
+					world.addParticle(ParticleTypes.SPLASH, pos.x, pos.y, pos.z, 5, 5, 5);
 				}
 			}
 		}

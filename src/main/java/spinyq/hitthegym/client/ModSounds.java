@@ -1,10 +1,12 @@
 package spinyq.hitthegym.client;
 
+import com.google.common.collect.ImmutableList;
+
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import spinyq.hitthegym.common.ModConstants;
 
 /**
@@ -15,17 +17,17 @@ import spinyq.hitthegym.common.ModConstants;
 @Mod.EventBusSubscriber
 public class ModSounds {
 	
-	public static SoundEvent lift;
+	public static final SoundEvent LIFT = new SoundEvent(
+			new ResourceLocation(ModConstants.MODID, "lift"))
+			.setRegistryName(new ResourceLocation(ModConstants.MODID, "lift"));
 	
-	public static void preInit() {
-		// Set soundevent locations
-		lift = new SoundEvent(new ResourceLocation(ModConstants.MODID, "lift"));
-		lift.setRegistryName(new ResourceLocation(ModConstants.MODID, "lift"));
-	}
+	public static final ImmutableList<SoundEvent> SOUNDS = ImmutableList.of(LIFT);
 	
 	@SubscribeEvent
 	public static void registerSounds(RegistryEvent.Register<SoundEvent> event) {
-		event.getRegistry().registerAll(lift);
+		SOUNDS.forEach((sound) -> {
+			event.getRegistry().register(sound);
+		});
 	}
 	
 }

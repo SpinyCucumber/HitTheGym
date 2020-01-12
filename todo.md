@@ -7,4 +7,6 @@
 - [ ] Hookup tick handler to the exercise rep handler
 - [ ] Add utility commands (Use Mojang's Brigadier)
 - [ ] Add strengths changed message (server -> client)
-- [ ] Use MC 1.15
+- [ ] Use MC 1.14.4
+- [ ] Add ASM Transformers
+- [ ] Check out "Event Network Channels"

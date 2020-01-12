@@ -3,7 +3,7 @@ package spinyq.hitthegym.common.core;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraftforge.common.util.INBTSerializable;
 
 /**
@@ -12,7 +12,7 @@ import net.minecraftforge.common.util.INBTSerializable;
  * @author SpinyQ
  *
  */
-public class Strengths implements INBTSerializable<NBTTagCompound> {
+public class Strengths implements INBTSerializable<CompoundNBT> {
 
 	private Map<MuscleGroup, Double> strengths;
 
@@ -37,11 +37,11 @@ public class Strengths implements INBTSerializable<NBTTagCompound> {
 	/**
 	 * Converts the strength state into NBT for storage.
 	 */
-	public NBTTagCompound serializeNBT() {
-		NBTTagCompound result = new NBTTagCompound();
+	public CompoundNBT serializeNBT() {
+		CompoundNBT result = new CompoundNBT();
 		// For every strength we have, write a double using the enum value as the key.
 		for (Map.Entry<MuscleGroup, Double> entry : strengths.entrySet()) {
-			result.setDouble(entry.getKey().name(), entry.getValue());
+			result.putDouble(entry.getKey().name(), entry.getValue());
 		}
 		return result;
 	}
@@ -50,9 +50,9 @@ public class Strengths implements INBTSerializable<NBTTagCompound> {
 	/**
 	 * Reads the strength state from NBT.
 	 */
-	public void deserializeNBT(NBTTagCompound nbt) {
+	public void deserializeNBT(CompoundNBT nbt) {
 		// For every entry in the tag compound, read a musclegroup and a double.
-		for (String key : nbt.getKeySet()) {
+		for (String key : nbt.keySet()) {
 			setStrength(MuscleGroup.valueOf(key), nbt.getDouble(key));
 		}
 	}

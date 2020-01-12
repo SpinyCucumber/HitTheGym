@@ -5,23 +5,25 @@ import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.AbstractClientPlayer;
-import net.minecraft.client.model.ModelBiped;
-import net.minecraft.client.model.ModelRenderer;
-import net.minecraft.client.renderer.entity.RenderManager;
-import net.minecraft.client.renderer.entity.RenderPlayer;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.EnumHandSide;
+import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
+import net.minecraft.client.renderer.entity.EntityRendererManager;
+import net.minecraft.client.renderer.entity.PlayerRenderer;
+import net.minecraft.client.renderer.entity.model.PlayerModel;
+import net.minecraft.client.renderer.entity.model.RendererModel;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.Hand;
+import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.registries.IForgeRegistryEntry;
+import net.minecraftforge.registries.ForgeRegistryEntry;
 import net.minecraftforge.registries.RegistryBuilder;
 import spinyq.hitthegym.common.HitTheGym;
 import spinyq.hitthegym.common.ModConstants;
-import spinyq.hitthegym.common.capability.IStrengthsCapability;
+import spinyq.hitthegym.common.capability.CapabilityUtils;
+import spinyq.hitthegym.common.capability.CapabilityUtils.MissingCapabilityException;
+import spinyq.hitthegym.common.capability.StrengthsCapability;
 
 /**
  * Represents a type of exercise the player can perform (e.g. curls, squats, etc.)
@@ -29,7 +31,7 @@ import spinyq.hitthegym.common.capability.IStrengthsCapability;
  * @author spinyq
  *
  */
-public abstract class Exercise extends IForgeRegistryEntry.Impl<Exercise> {
+public abstract class Exercise extends ForgeRegistryEntry<Exercise> {
 	
 	/**
 	 * What is "gained" by performing an exercise. Has muscle groups and how much each group is worked.
@@ -59,8 +61,10 @@ public abstract class Exercise extends IForgeRegistryEntry.Impl<Exercise> {
 		 * Increases a player's strength values.
 		 * @param player
 		 */
-		public void onRep(EntityPlayer player) {
-			onRep(player.getCapability(IStrengthsCapability.CAPABILITY, null).getStrengths());
+		public void onRep(PlayerEntity player) {
+			player.getCapability(StrengthsCapability.CAPABILITY).ifPresent((cap) -> {
+				onRep(cap.getStrengths());
+			});
 		}
 		
 	}
@@ -92,9 +96,10 @@ public abstract class Exercise extends IForgeRegistryEntry.Impl<Exercise> {
 
 		/**
 		 * Overload of isMet that retrieves the capability of a player.
+		 * @throws MissingCapabilityException 
 		 */
-		public boolean isMet(EntityPlayer player) {
-			return isMet(player.getCapability(IStrengthsCapability.CAPABILITY, null).getStrengths());
+		public boolean isMet(PlayerEntity player) throws MissingCapabilityException {
+			return isMet(CapabilityUtils.getCapability(player, StrengthsCapability.CAPABILITY).getStrengths());
 		}
 		
 		public String getStatusMessage(Strengths strengths) {
@@ -103,48 +108,40 @@ public abstract class Exercise extends IForgeRegistryEntry.Impl<Exercise> {
 					return String.format("Your {} are not strong enough to perform this exercise.", entry.getKey().getPluralName());
 				}
 			}
+			// TODO Error
 			return null;
 		}
 
 		/**
 		 * @param player
 		 * @return A message to display to the player when they are not strong enough to perform an exercise. If the player is strong enough, returns null.
+		 * @throws MissingCapabilityException 
 		 */
-		public String getStatusMessage(EntityPlayer player) {
-			return getStatusMessage(player.getCapability(IStrengthsCapability.CAPABILITY, null).getStrengths());
+		public String getStatusMessage(PlayerEntity player) throws MissingCapabilityException {
+			return getStatusMessage(CapabilityUtils.getCapability(player, StrengthsCapability.CAPABILITY).getStrengths());
 		}
 		
 	}
 	
-	public abstract void animate(AbstractClientPlayer player, double liftProgress);
+	public abstract void animate(AbstractClientPlayerEntity player, double liftProgress);
+	
+	public RepResult getResult() {
+		return result;
+	}
+
+	public StrengthRequirement getRequirement() {
+		return requirement;
+	}
 
 	/**
 	 * Called when a player starts performing this exercise
 	 */
-	public void onAdd(EntityPlayer player) {}
+	public void onAdd(PlayerEntity player) {}
 	
 	/**
 	 * Called when a player stops performing this exercise
 	 */
-	public void onRemove(EntityPlayer player) {}
-	
-	/**
-	 * Called when a rep is successfully completed
-	 */
-	public void onRep(EntityPlayer player) {
-		result.onRep(player);
-	}
-	
-	public String getStatusMessage(EntityPlayer player) {
-		return requirement.getStatusMessage(player);
-	}
-
-	/**
-	 * Whether or not a player can use this exercise
-	 */
-	public boolean canUse(EntityPlayer player) {
-		return requirement.isMet(player);
-	}
+	public void onRemove(PlayerEntity player) {}
 	
 	public Exercise(ResourceLocation regName, RepResult result, StrengthRequirement requirement) {
 		this.setRegistryName(regName);
@@ -159,8 +156,8 @@ public abstract class Exercise extends IForgeRegistryEntry.Impl<Exercise> {
 			new RepResult(ImmutableMap.of(MuscleGroup.BICEP, 1.0)),
 			new StrengthRequirement(ImmutableMap.of())) {
 		@Override
-		public void animate(AbstractClientPlayer player, double liftProgress) {
-			ModelRenderer arm = getActiveArmRenderer(player);
+		public void animate(AbstractClientPlayerEntity player, double liftProgress) {
+			RendererModel arm = getActiveArmRenderer(player);
 			arm.rotateAngleZ = 0;
 			arm.rotateAngleX = (float) (liftProgress / 100.0 * -Math.PI / 2.0);
 		}
@@ -171,10 +168,10 @@ public abstract class Exercise extends IForgeRegistryEntry.Impl<Exercise> {
 			new RepResult(ImmutableMap.of(MuscleGroup.DELTOID, 1.0)),
 			new StrengthRequirement(ImmutableMap.of(MuscleGroup.BICEP, 20.0))) {
 		@Override
-		public void animate(AbstractClientPlayer player, double liftProgress) {
-			ModelRenderer arm = getActiveArmRenderer(player);
+		public void animate(AbstractClientPlayerEntity player, double liftProgress) {
+			RendererModel arm = getActiveArmRenderer(player);
 			arm.rotateAngleX = 0;
-			int sgn = getActiveHandSide(player) == EnumHandSide.RIGHT ? 1 : -1;
+			int sgn = getActiveHandSide(player) == HandSide.RIGHT ? 1 : -1;
 			arm.rotateAngleZ = (float) (liftProgress / 100.0 * sgn * Math.PI / 2.0);
 		}
 		
@@ -184,13 +181,13 @@ public abstract class Exercise extends IForgeRegistryEntry.Impl<Exercise> {
 			new RepResult(ImmutableMap.of(MuscleGroup.GLUTEAL, 1.0)),
 			new StrengthRequirement(ImmutableMap.of())) {
 		@Override
-		public void animate(AbstractClientPlayer player, double liftProgress) {
+		public void animate(AbstractClientPlayerEntity player, double liftProgress) {
 			double progress = liftProgress / 100.0,
 					angle = (1.0 - progress) * Math.PI / 4.0,
 					bodyHeight = 10.0,
 					bodyPosY = bodyHeight / 16.0  * (1.0 - Math.cos(angle)),
 					bodyPosZ = -bodyHeight / 16.0 * Math.sin(angle);
-			ModelBiped model = getPlayerModel(player);
+			PlayerModel<AbstractClientPlayerEntity> model = getPlayerModel(player);
 			// Set arm z rotations to 0
 			model.bipedLeftArm.rotateAngleZ = 0;
 			model.bipedRightArm.rotateAngleZ = 0;
@@ -200,29 +197,29 @@ public abstract class Exercise extends IForgeRegistryEntry.Impl<Exercise> {
 			// Set body rotation
 			model.bipedBody.rotateAngleX = (float) angle;
 			// Set body position
-			model.bipedBody.offsetY = (float) bodyPosY;
-			model.bipedHead.offsetY = (float) bodyPosY;
-			model.bipedLeftArm.offsetY = (float) bodyPosY;
-			model.bipedRightArm.offsetY = (float) bodyPosY;
-			model.bipedBody.offsetZ = (float) bodyPosZ;
-			model.bipedHead.offsetZ = (float) bodyPosZ;
-			model.bipedLeftArm.offsetZ = (float) bodyPosZ;
-			model.bipedRightArm.offsetZ = (float) bodyPosZ;
+			model.bipedBody.rotationPointY = (float) bodyPosY;
+			model.bipedHead.rotationPointY = (float) bodyPosY;
+			model.bipedLeftArm.rotationPointY = (float) bodyPosY;
+			model.bipedRightArm.rotationPointY = (float) bodyPosY;
+			model.bipedBody.rotationPointZ = (float) bodyPosZ;
+			model.bipedHead.rotationPointZ = (float) bodyPosZ;
+			model.bipedLeftArm.rotationPointZ = (float) bodyPosZ;
+			model.bipedRightArm.rotationPointZ = (float) bodyPosZ;
 		}
 
 		@Override
-		public void onRemove(EntityPlayer player) {
+		public void onRemove(PlayerEntity player) {
 			// Side check
 			if (player.world.isRemote) {
-				ModelBiped model = getPlayerModel((AbstractClientPlayer) player);
-				model.bipedBody.offsetY = 0;
-				model.bipedHead.offsetY = 0;
-				model.bipedRightArm.offsetY = 0;
-				model.bipedLeftArm.offsetY = 0;
-				model.bipedBody.offsetZ = 0;
-				model.bipedHead.offsetZ = 0;
-				model.bipedRightArm.offsetZ = 0;
-				model.bipedLeftArm.offsetZ = 0;
+				PlayerModel<AbstractClientPlayerEntity> model = getPlayerModel((AbstractClientPlayerEntity) player);
+				model.bipedBody.rotationPointY = 0;
+				model.bipedHead.rotationPointY = 0;
+				model.bipedRightArm.rotationPointY = 0;
+				model.bipedLeftArm.rotationPointY = 0;
+				model.bipedBody.rotationPointZ = 0;
+				model.bipedHead.rotationPointZ = 0;
+				model.bipedRightArm.rotationPointZ = 0;
+				model.bipedLeftArm.rotationPointZ = 0;
 			}
 		}
 		
@@ -233,7 +230,7 @@ public abstract class Exercise extends IForgeRegistryEntry.Impl<Exercise> {
 		
 		@SubscribeEvent
 		public static void newRegistry(RegistryEvent.NewRegistry event) {
-			HitTheGym.log.info("Creating exercise registry...");
+			HitTheGym.LOGGER.info("Creating exercise registry...");
 			RegistryBuilder<Exercise> builder = new RegistryBuilder<Exercise>();
 			builder.setType(Exercise.class);
 			builder.setName(new ResourceLocation(ModConstants.MODID, "exercises"));
@@ -247,16 +244,15 @@ public abstract class Exercise extends IForgeRegistryEntry.Impl<Exercise> {
 		
 	}
 	
-	private static RenderPlayer getRenderPlayer(AbstractClientPlayer player) {
-		Minecraft mc = Minecraft.getMinecraft();
-		RenderManager manager = mc.getRenderManager();
+	private static PlayerRenderer getRenderPlayer(AbstractClientPlayerEntity player) {
+		EntityRendererManager manager = Minecraft.getInstance().getRenderManager();
 		return manager.getSkinMap().get(player.getSkinType());
 	}
 
-	private static ModelBiped getPlayerModel(AbstractClientPlayer player) {
-		RenderPlayer render = getRenderPlayer(player);
+	private static PlayerModel<AbstractClientPlayerEntity> getPlayerModel(AbstractClientPlayerEntity player) {
+		PlayerRenderer render = getRenderPlayer(player);
 		if(render != null)
-			return render.getMainModel();
+			return render.getEntityModel();
 		return null;
 	}
 	
@@ -266,7 +262,7 @@ public abstract class Exercise extends IForgeRegistryEntry.Impl<Exercise> {
 	 * @param hand
 	 * @return
 	 */
-	private static ModelRenderer getArmRenderer(ModelBiped model, EnumHandSide hand) {
+	private static RendererModel getArmRenderer(PlayerModel<AbstractClientPlayerEntity> model, HandSide hand) {
 		switch (hand) {
 			case RIGHT: return model.bipedRightArm;
 			case LEFT: return model.bipedLeftArm;
@@ -279,13 +275,13 @@ public abstract class Exercise extends IForgeRegistryEntry.Impl<Exercise> {
 	 * @param player
 	 * @return
 	 */
-	private static EnumHandSide getActiveHandSide(AbstractClientPlayer player) {
-		if (player.getActiveHand() == EnumHand.MAIN_HAND) {
+	private static HandSide getActiveHandSide(AbstractClientPlayerEntity player) {
+		if (player.getActiveHand() == Hand.MAIN_HAND) {
 			return player.getPrimaryHand();
 		}
 		else
 		{
-			return (player.getPrimaryHand() == EnumHandSide.LEFT) ? EnumHandSide.RIGHT : EnumHandSide.LEFT;
+			return (player.getPrimaryHand() == HandSide.LEFT) ? HandSide.RIGHT : HandSide.LEFT;
 		}
 	}
 	
@@ -294,7 +290,7 @@ public abstract class Exercise extends IForgeRegistryEntry.Impl<Exercise> {
 	 * @param player
 	 * @return
 	 */
-	private static ModelRenderer getActiveArmRenderer(AbstractClientPlayer player) {
+	private static RendererModel getActiveArmRenderer(AbstractClientPlayerEntity player) {
 		return getArmRenderer(getPlayerModel(player), getActiveHandSide(player));
 	}
 	
