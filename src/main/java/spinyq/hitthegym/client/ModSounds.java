@@ -6,7 +6,8 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import spinyq.hitthegym.common.ModConstants;
 
 /**
@@ -14,7 +15,7 @@ import spinyq.hitthegym.common.ModConstants;
  * @author SpinyQ
  *
  */
-@Mod.EventBusSubscriber
+@EventBusSubscriber(bus = Bus.MOD)
 public class ModSounds {
 	
 	public static final SoundEvent LIFT = new SoundEvent(
