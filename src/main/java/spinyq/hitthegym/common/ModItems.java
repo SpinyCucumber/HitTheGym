@@ -21,7 +21,8 @@ public class ModItems {
 	@SubscribeEvent
 	public static void onRegister(RegistryEvent.Register<Item> event) {
 		// Register items
-		// Yay functional programming
+		// DEBUG
+		HitTheGym.LOGGER.info("Registering items...");
 		ITEMS.stream().map(IItemBase::asItem).forEach(event.getRegistry()::register);
 		// Register models
 		ITEMS.forEach(IItemBase::registerModels);

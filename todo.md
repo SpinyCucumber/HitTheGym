@@ -10,3 +10,4 @@
 - [ ] Use MC 1.14.4
 - [ ] Add ASM Transformers
 - [ ] Check out "Event Network Channels"
+- [ ] Add pack.mcmeta
