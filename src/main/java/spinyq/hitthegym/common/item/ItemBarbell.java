@@ -9,7 +9,7 @@ import spinyq.hitthegym.common.ModConstants;
 import spinyq.hitthegym.common.core.Exercise;
 import spinyq.hitthegym.common.core.ExerciseSet;
 
-public class ItemBarbell extends ItemWeight {
+public class ItemBarbell extends ItemWeight implements IItemBase {
 
 	private ExerciseSet exercises = new ExerciseSet(ImmutableList.of(Exercise.SQUAT));
 	
@@ -19,7 +19,7 @@ public class ItemBarbell extends ItemWeight {
 		this.setRegistryName(new ResourceLocation(ModConstants.MODID, "barbell"));
 	}
 
-	public void registerModel() {
+	public void registerModels() {
 		Minecraft.getInstance().getItemRenderer().getItemModelMesher().register(this, new ModelResourceLocation(ModConstants.MODID, "barbell"));
 	}
 
