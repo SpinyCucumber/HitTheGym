@@ -5,6 +5,8 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import spinyq.hitthegym.common.capability.CapabilityUtils;
 import spinyq.hitthegym.common.capability.CapabilityUtils.MissingCapabilityException;
 import spinyq.hitthegym.common.capability.LifterCapability;
@@ -15,6 +17,7 @@ import spinyq.hitthegym.common.core.Lifter.Active;
 import spinyq.hitthegym.common.core.LifterHolder;
 import spinyq.hitthegym.common.core.StrengthsHolder;
 
+@OnlyIn(Dist.CLIENT)
 public class LiftScreen extends Screen {
 	
 	private static final int LIFT_BUTTON = 0, CYCLE_BUTTON = 1;
@@ -31,6 +34,13 @@ public class LiftScreen extends Screen {
 	public LiftScreen(ExerciseSet exercises) {
 		// Initialize the screen with a title.
 		super(new TranslationTextComponent("lift.title"));
+		this.exercises = exercises;
+		// Start with first exercise
+		iExercise = 0;
+	}
+
+	@Override
+	protected void init() {
 		// Retrieve capabilities for easier access.
 		try {
 			lifterHolder = CapabilityUtils.getCapability(this.getMinecraft().player, LifterCapability.CAPABILITY);
@@ -39,9 +49,6 @@ public class LiftScreen extends Screen {
 			throw new RuntimeException("Could not initialize lift screen.", e);
 		}
 		// When GUI is opened, set lifter state to active
-		this.exercises = exercises;
-		iExercise = 0;
-		// Start with first exercise
 		lifter = new Active(exercises.getList().get(iExercise));
 		lifterHolder.setLifter(lifter);
 		lifter.sendToServer();

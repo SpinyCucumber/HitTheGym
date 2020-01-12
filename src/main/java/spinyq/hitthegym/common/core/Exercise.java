@@ -17,6 +17,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 import net.minecraftforge.registries.RegistryBuilder;
 import spinyq.hitthegym.common.HitTheGym;
@@ -225,7 +226,7 @@ public abstract class Exercise extends ForgeRegistryEntry<Exercise> {
 		
 	};
 	
-	@EventBusSubscriber
+	@EventBusSubscriber(bus = Bus.MOD)
 	public static class Registrar {
 		
 		@SubscribeEvent
