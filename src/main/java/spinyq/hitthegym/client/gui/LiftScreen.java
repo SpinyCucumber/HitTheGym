@@ -3,7 +3,6 @@ package spinyq.hitthegym.client.gui;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -93,7 +92,7 @@ public class LiftScreen extends Screen {
 			}
 			// If not, tell them they are not strong enough
 			else {
-				ITextComponent text = new StringTextComponent(lifter.exercise.getRequirement().getStatusMessage(strengthsHolder.getStrengths()));
+				ITextComponent text = lifter.exercise.getRequirement().getStatusMessage(strengthsHolder.getStrengths());
 				lifter.getPlayer().sendStatusMessage(text, true);
 			}
 			return true;

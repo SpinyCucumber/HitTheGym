@@ -1,0 +1,7 @@
+{
+	"item.hitthegym.dumbbell": "Dumbbell",
+	"item.hitthegym.barbell": "Barbell",
+	"argument.hitthegym.musclegroup.invalid": "Not a valid muscle group.",
+	"command.hitthegym.strength.get": "%s: %f",
+	"message.hitthegym.tooweak": "Your %s are not strong enough to do this."
+}

@@ -9,15 +9,15 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import spinyq.hitthegym.common.item.ItemBarbell;
-import spinyq.hitthegym.common.item.ItemDumbell;
+import spinyq.hitthegym.common.item.ItemDumbbell;
 
 @EventBusSubscriber(bus = Bus.MOD)
 public class ModItems {
 	
-	public static final ItemDumbell DUMBELL = new ItemDumbell();
+	public static final ItemDumbbell DUMBBELL = new ItemDumbbell();
 	public static final ItemBarbell BARBELL = new ItemBarbell();
 	
-	public static final ImmutableList<IItemProvider> ITEMS = ImmutableList.of(DUMBELL, BARBELL);
+	public static final ImmutableList<IItemProvider> ITEMS = ImmutableList.of(DUMBBELL, BARBELL);
 	
 	@SubscribeEvent
 	public static void register(RegistryEvent.Register<Item> event) {

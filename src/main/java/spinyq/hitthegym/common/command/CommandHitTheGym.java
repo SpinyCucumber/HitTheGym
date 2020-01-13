@@ -35,7 +35,7 @@ public class CommandHitTheGym {
 								Strengths strengths = CapabilityUtils.getCapability(player, StrengthsCapability.CAPABILITY).getStrengths();
 								double strength = strengths.getStrength(group);
 								// Send info
-								ctx.getSource().sendFeedback(new TranslationTextComponent("commands.hitthegym.strength.get", group, strength), true);
+								ctx.getSource().sendFeedback(new TranslationTextComponent("command.hitthegym.strength.get", group, strength), true);
 							} catch (MissingCapabilityException e) {
 								throw new RuntimeException("Error occured while executing command.", e);
 							}
@@ -48,7 +48,7 @@ public class CommandHitTheGym {
 							Strengths strengths = CapabilityUtils.getCapability(player, StrengthsCapability.CAPABILITY).getStrengths();
 							// Iterate over all muscle groups and send a message for each
 							for (MuscleGroup group : MuscleGroup.values()) {
-								ctx.getSource().sendFeedback(new TranslationTextComponent("commands.hitthegym.strength.get", group, strengths.getStrength(group)), true);
+								ctx.getSource().sendFeedback(new TranslationTextComponent("command.hitthegym.strength.get", group, strengths.getStrength(group)), true);
 							}
 						} catch (MissingCapabilityException e) {
 							throw new RuntimeException("Error occured while executing command.", e);

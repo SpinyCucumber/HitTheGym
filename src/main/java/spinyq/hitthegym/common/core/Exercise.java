@@ -14,6 +14,8 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
@@ -103,10 +105,11 @@ public abstract class Exercise extends ForgeRegistryEntry<Exercise> {
 			return isMet(CapabilityUtils.getCapability(player, StrengthsCapability.CAPABILITY).getStrengths());
 		}
 		
-		public String getStatusMessage(Strengths strengths) {
+		public ITextComponent getStatusMessage(Strengths strengths) {
 			for (Map.Entry<MuscleGroup, Double> entry : requirements.entrySet()) {
 				if (strengths.getStrength(entry.getKey()) < entry.getValue()) {
-					return String.format("Your {} are not strong enough to perform this exercise.", entry.getKey().getPluralName());
+					// TODO Translate muscle groups
+					return new TranslationTextComponent("message.hitthegym.tooweak", entry.getKey().getPluralName());
 				}
 			}
 			// TODO Error
@@ -118,7 +121,7 @@ public abstract class Exercise extends ForgeRegistryEntry<Exercise> {
 		 * @return A message to display to the player when they are not strong enough to perform an exercise. If the player is strong enough, returns null.
 		 * @throws MissingCapabilityException 
 		 */
-		public String getStatusMessage(PlayerEntity player) throws MissingCapabilityException {
+		public ITextComponent getStatusMessage(PlayerEntity player) throws MissingCapabilityException {
 			return getStatusMessage(CapabilityUtils.getCapability(player, StrengthsCapability.CAPABILITY).getStrengths());
 		}
 		

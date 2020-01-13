@@ -7,11 +7,11 @@ import spinyq.hitthegym.common.ModConstants;
 import spinyq.hitthegym.common.core.Exercise;
 import spinyq.hitthegym.common.core.ExerciseSet;
 
-public class ItemDumbell extends ItemWeight {
+public class ItemDumbbell extends ItemWeight {
 	
 	private ExerciseSet exercises = new ExerciseSet(ImmutableList.of(Exercise.CURL, Exercise.LATERAL));
 	
-	public ItemDumbell() {
+	public ItemDumbbell() {
 		super(new Properties().maxStackSize(1));
 		// Set registry name
 		setRegistryName(new ResourceLocation(ModConstants.MODID, "dumbbell"));
