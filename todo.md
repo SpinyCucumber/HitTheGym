@@ -11,3 +11,5 @@
 - [ ] Add ASM Transformers
 - [ ] Check out "Event Network Channels"
 - [x] Add pack.mcmeta
+- [ ] Better translation support for messages
+- [ ] Add muscle group suggestions in commands
