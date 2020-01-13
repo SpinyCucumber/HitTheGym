@@ -13,3 +13,4 @@
 - [x] Add pack.mcmeta
 - [ ] Better translation support for messages
 - [ ] Add muscle group suggestions in commands
+- [ ] Lift rate depends on muscle strength and difficulty of exercise
