@@ -7,17 +7,24 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import spinyq.hitthegym.client.gui.LiftScreen;
-import spinyq.hitthegym.common.core.ExerciseSet;
+import spinyq.hitthegym.common.core.LifterContext;
 
-public abstract class ItemWeight extends Item {
+public class ItemWeight extends Item {
 
-	public ItemWeight(Properties properties) {
+	public ItemWeight(ResourceLocation name, Properties properties, LifterContext context) {
 		super(properties);
+		this.context = context;
+		this.setRegistryName(name);
 	}
 
-	public abstract ExerciseSet getExerciseSet();
+	private LifterContext context;
+	
+	public LifterContext getContext() {
+		return context;
+	}
 	
 	/**
      * Called when the equipped item is right clicked.
@@ -31,7 +38,7 @@ public abstract class ItemWeight extends Item {
         // Open GUI if client
         if (worldIn.isRemote) {
         	// Open GUI with this item's exercises
-        	Minecraft.getInstance().displayGuiScreen(new LiftScreen(getExerciseSet()));
+        	Minecraft.getInstance().displayGuiScreen(new LiftScreen(context));
         }
         return ActionResult.newResult(ActionResultType.SUCCESS, itemstack);
     }

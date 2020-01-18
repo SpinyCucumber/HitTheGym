@@ -5,6 +5,7 @@ import java.util.Map;
 
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraftforge.common.util.INBTSerializable;
+import spinyq.hitthegym.common.ModConfig;
 
 /**
  * Information attached to things that have "strength," like players.
@@ -22,7 +23,7 @@ public class Strengths implements INBTSerializable<CompoundNBT> {
 	}
 	
 	public double getStrength(MuscleGroup group) {
-		return strengths.getOrDefault(group, 0.0);
+		return strengths.getOrDefault(group, ModConfig.DEFAULT_STRENGTH);
 	}
 	
 	public void setStrength(MuscleGroup group, double strength) {

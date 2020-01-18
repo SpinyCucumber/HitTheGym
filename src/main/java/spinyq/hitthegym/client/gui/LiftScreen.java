@@ -10,9 +10,9 @@ import spinyq.hitthegym.common.capability.CapabilityUtils;
 import spinyq.hitthegym.common.capability.CapabilityUtils.MissingCapabilityException;
 import spinyq.hitthegym.common.capability.LifterCapability;
 import spinyq.hitthegym.common.capability.StrengthsCapability;
-import spinyq.hitthegym.common.core.ExerciseSet;
 import spinyq.hitthegym.common.core.Lifter;
 import spinyq.hitthegym.common.core.Lifter.Active;
+import spinyq.hitthegym.common.core.LifterContext;
 import spinyq.hitthegym.common.core.LifterHolder;
 import spinyq.hitthegym.common.core.StrengthsHolder;
 
@@ -25,17 +25,15 @@ public class LiftScreen extends Screen {
 	private LifterHolder lifterHolder;
 	private StrengthsHolder strengthsHolder;
 	private Active lifter;
-	// The list of exercises to cycle through.
-	private ExerciseSet exercises;
+	// The context of the lift... contains the exercise set and difficulty.
+	private LifterContext context;
 	// The current exercise.
 	private int iExercise;
 	
-	public LiftScreen(ExerciseSet exercises) {
+	public LiftScreen(LifterContext context) {
 		// Initialize the screen with a title.
 		super(new TranslationTextComponent("lift.title"));
-		this.exercises = exercises;
-		// Start with first exercise
-		iExercise = 0;
+		this.context = context;
 	}
 
 	@Override
@@ -48,7 +46,9 @@ public class LiftScreen extends Screen {
 			throw new RuntimeException("Could not initialize lift screen.", e);
 		}
 		// When GUI is opened, set lifter state to active
-		lifter = new Active(exercises.getList().get(iExercise));
+		// Start with first exercise
+		iExercise = 0;
+		lifter = new Active(context, context.exercises.getList().get(iExercise));
 		lifterHolder.setLifter(lifter);
 		lifter.sendToServer();
 	}
@@ -99,8 +99,8 @@ public class LiftScreen extends Screen {
 		}
 		// Cycle exercise if right click
 		else if (lifter.liftProgress == 0.0 && mouseButton == CYCLE_BUTTON) {
-			iExercise = (iExercise + 1) % exercises.getList().size();
-			lifter.exercise = exercises.getList().get(iExercise);
+			iExercise = (iExercise + 1) % context.exercises.getList().size();
+			lifter.exercise = context.exercises.getList().get(iExercise);
 			lifter.sendToServer();
 			return true;
 		}

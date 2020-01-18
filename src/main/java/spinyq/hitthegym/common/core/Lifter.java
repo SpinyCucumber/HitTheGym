@@ -98,15 +98,25 @@ public class Lifter {
 	public static class Active extends Lifter {
 		
 		public Exercise exercise; // When active, lifters are performing a specific exercise
+		/**
+		 * A lifting context includes an exercise set and how difficult the weight is to lift.
+		 * The current exercise should be part of the exercise set.
+		 */
+		public LifterContext context;
 		public double liftProgress; // When active lifters also have a certain position in their rep
 		public boolean lifting;
 		public double liftRate = 50.0, dropRate = 100.0, maxLiftProgress = 100.0;
 		public int timer = 0;
 		
-		public Active(Exercise exercise) {
-			this.exercise = exercise;
-			this.liftProgress = 0.0;
+		public Active() {
+			liftProgress = 0.0;
 			lifting = false;
+		}
+		
+		public Active(LifterContext context, Exercise exercise) {
+			this();
+			this.context = context;
+			this.exercise = exercise;
 		}
 
 		@Override

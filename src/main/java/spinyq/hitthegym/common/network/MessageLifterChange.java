@@ -9,6 +9,7 @@ import spinyq.hitthegym.common.capability.CapabilityUtils.MissingCapabilityExcep
 import spinyq.hitthegym.common.capability.LifterCapability;
 import spinyq.hitthegym.common.core.Exercise;
 import spinyq.hitthegym.common.core.Lifter;
+import spinyq.hitthegym.common.core.LifterContext;
 import spinyq.hitthegym.common.network.Messages.MessageType;
 
 public class MessageLifterChange {
@@ -26,11 +27,13 @@ public class MessageLifterChange {
 				buffer.writeEnumValue(message.lifter.getType());
 				// If state is active, write some more stuff
 				if (message.lifter instanceof Lifter.Active) {
-					Lifter.Active active = (Lifter.Active) message.lifter;
+					Lifter.Active lifter = (Lifter.Active) message.lifter;
 					// Write exercise
-					((IForgePacketBuffer) buffer).writeRegistryId(active.exercise);
+					((IForgePacketBuffer) buffer).writeRegistryId(lifter.exercise);
+					// Write the context
+					lifter.context.write(buffer);
 					// Write whether we are actively lifting
-					buffer.writeBoolean(active.lifting);
+					buffer.writeBoolean(lifter.lifting);
 				}
 			},
 			(buffer) -> {
@@ -41,13 +44,16 @@ public class MessageLifterChange {
 				Lifter.Type type = buffer.readEnumValue(Lifter.Type.class);
 				// Only care about active states
 				if (type == Lifter.Type.ACTIVE) {
-					// Read exercise
-					Exercise exercise = ((IForgePacketBuffer) buffer).readRegistryIdSafe(Exercise.class);
 					// Construct the new lifter state
-					Lifter.Active active = new Lifter.Active(exercise);
+					Lifter.Active lifter = new Lifter.Active();
+					// Read exercise
+					lifter.exercise = ((IForgePacketBuffer) buffer).readRegistryIdSafe(Exercise.class);
+					// Read the context
+					lifter.context = new LifterContext();
+					lifter.context.read(buffer);
 					// Read lifting
-					active.lifting = buffer.readBoolean();
-					message.lifter = active;
+					lifter.lifting = buffer.readBoolean();
+					message.lifter = lifter;
 				} else if (type == Lifter.Type.IDLE) {
 					message.lifter = new Lifter();
 				}
