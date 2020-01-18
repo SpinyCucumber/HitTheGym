@@ -111,7 +111,7 @@ public class Lifter {
 
 		@Override
 		public void animate() {
-			exercise.animate((AbstractClientPlayerEntity) getPlayer(), liftProgress);
+			exercise.getAnimator().animate((AbstractClientPlayerEntity) getPlayer(), liftProgress);
 		}
 
 		@Override

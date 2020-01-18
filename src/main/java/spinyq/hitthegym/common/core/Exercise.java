@@ -2,6 +2,7 @@ package spinyq.hitthegym.common.core;
 
 import java.util.Map;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 import net.minecraft.client.Minecraft;
@@ -16,6 +17,8 @@ import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
@@ -24,9 +27,6 @@ import net.minecraftforge.registries.ForgeRegistryEntry;
 import net.minecraftforge.registries.RegistryBuilder;
 import spinyq.hitthegym.common.HitTheGym;
 import spinyq.hitthegym.common.ModConstants;
-import spinyq.hitthegym.common.capability.CapabilityUtils;
-import spinyq.hitthegym.common.capability.CapabilityUtils.MissingCapabilityException;
-import spinyq.hitthegym.common.capability.StrengthsCapability;
 
 /**
  * Represents a type of exercise the player can perform (e.g. curls, squats, etc.)
@@ -34,79 +34,69 @@ import spinyq.hitthegym.common.capability.StrengthsCapability;
  * @author spinyq
  *
  */
-public abstract class Exercise extends ForgeRegistryEntry<Exercise> {
+public class Exercise extends ForgeRegistryEntry<Exercise> {
 	
 	/**
-	 * What is "gained" by performing an exercise. Has muscle groups and how much each group is worked.
+	 * Something the player gains when completing an exercise.
 	 * @author SpinyQ
 	 *
 	 */
-	public static class RepResult {
+	public static interface IExerciseReward {
 		
-		private ImmutableMap<MuscleGroup, Double> gains;
-
-		/**
-		 * @param gains A map containing musclegroups mapped to how much muscle is added to them when a rep is completed.
-		 */
-		public RepResult(ImmutableMap<MuscleGroup, Double> gains) {
-			super();
-			this.gains = gains;
-		}
-		
-		public void onRep(Strengths strengths) {
-			// Increase strengths
-			gains.forEach((group, amt) -> {
-				strengths.addStrength(group, amt);
-			});
-		}
-		
-		/**
-		 * Increases a player's strength values.
-		 * @param player
-		 */
-		public void onRep(PlayerEntity player) {
-			player.getCapability(StrengthsCapability.CAPABILITY).ifPresent((cap) -> {
-				onRep(cap.getStrengths());
-			});
-		}
+		void reward(Strengths strengths);
 		
 	}
 	
 	/**
-	 * A requirement players must meet before doing an exercise
+	 * A condition that must be satisfied in order to perform an exercise.
 	 * @author SpinyQ
 	 *
 	 */
-	public static class StrengthRequirement {
+	public static interface IExerciseRequirement {
 		
-		private ImmutableMap<MuscleGroup, Double> requirements;
+		boolean isMet(Strengths strengths);
+		
+		ITextComponent getStatusMessage(Strengths strengths);
+		
+	}
+	
+	/**
+	 * Animates a player performing an exercise.
+	 * @author SpinyQ
+	 *
+	 */
+	@OnlyIn(Dist.CLIENT)
+	public static interface IExerciseAnimator {
+		
+		void animate(AbstractClientPlayerEntity player, double liftProgress);
+		default void start(AbstractClientPlayerEntity player) { }
+		default void end(AbstractClientPlayerEntity player) { }
+		
+	}
+	
+	public static class ExerciseStats implements IExerciseReward, IExerciseRequirement {
+		
+		private ImmutableMap<MuscleGroup, Double> difficulty;
 
-		public StrengthRequirement(ImmutableMap<MuscleGroup, Double> requirements) {
-			super();
-			this.requirements = requirements;
+		public ExerciseStats(ImmutableMap<MuscleGroup, Double> difficulty) {
+			this.difficulty = difficulty;
 		}
 		
 		/**
 		 * @param strengths
 		 * @return Whether the particular strengths satisfy the requirement
 		 */
+		@Override
 		public boolean isMet(Strengths strengths) {
-			for (Map.Entry<MuscleGroup, Double> entry : requirements.entrySet()) {
+			for (Map.Entry<MuscleGroup, Double> entry : difficulty.entrySet()) {
 				if (strengths.getStrength(entry.getKey()) < entry.getValue()) return false;
 			}
 			return true;
 		}
-
-		/**
-		 * Overload of isMet that retrieves the capability of a player.
-		 * @throws MissingCapabilityException 
-		 */
-		public boolean isMet(PlayerEntity player) throws MissingCapabilityException {
-			return isMet(CapabilityUtils.getCapability(player, StrengthsCapability.CAPABILITY).getStrengths());
-		}
 		
+		@Override
 		public ITextComponent getStatusMessage(Strengths strengths) {
-			for (Map.Entry<MuscleGroup, Double> entry : requirements.entrySet()) {
+			for (Map.Entry<MuscleGroup, Double> entry : difficulty.entrySet()) {
 				if (strengths.getStrength(entry.getKey()) < entry.getValue()) {
 					// TODO Translate muscle groups
 					return new TranslationTextComponent("message.hitthegym.tooweak", entry.getKey().getPluralName());
@@ -116,106 +106,117 @@ public abstract class Exercise extends ForgeRegistryEntry<Exercise> {
 			return null;
 		}
 
-		/**
-		 * @param player
-		 * @return A message to display to the player when they are not strong enough to perform an exercise. If the player is strong enough, returns null.
-		 * @throws MissingCapabilityException 
-		 */
-		public ITextComponent getStatusMessage(PlayerEntity player) throws MissingCapabilityException {
-			return getStatusMessage(CapabilityUtils.getCapability(player, StrengthsCapability.CAPABILITY).getStrengths());
+		@Override
+		public void reward(Strengths strengths) {
+			// Increase muscle strengths
+			for (Map.Entry<MuscleGroup, Double> entry : difficulty.entrySet()) {
+				strengths.addStrength(entry.getKey(), entry.getValue());
+			}
 		}
 		
-	}
-	
-	public abstract void animate(AbstractClientPlayerEntity player, double liftProgress);
-	
-	public RepResult getResult() {
-		return result;
-	}
-
-	public StrengthRequirement getRequirement() {
-		return requirement;
 	}
 
 	/**
 	 * Called when a player starts performing this exercise
 	 */
-	public void onAdd(PlayerEntity player) {}
+	public void onAdd(PlayerEntity player) {
+		if (player.world.isRemote) animator.start((AbstractClientPlayerEntity) player);
+	}
 	
 	/**
 	 * Called when a player stops performing this exercise
 	 */
-	public void onRemove(PlayerEntity player) {}
-	
-	public Exercise(ResourceLocation regName, RepResult result, StrengthRequirement requirement) {
-		this.setRegistryName(regName);
-		this.result = result;
-		this.requirement = requirement;
+	public void onRemove(PlayerEntity player) {
+		if (player.world.isRemote) animator.end((AbstractClientPlayerEntity) player);
 	}
 	
-	private RepResult result;
-	private StrengthRequirement requirement;
+	public IExerciseReward getReward() {
+		return reward;
+	}
+
+	public IExerciseRequirement getRequirement() {
+		return requirement;
+	}
+
+	public IExerciseAnimator getAnimator() {
+		return animator;
+	}
+
+	public Exercise(ResourceLocation name, IExerciseReward reward, IExerciseRequirement requirement, IExerciseAnimator animator) {
+		this.setRegistryName(name);
+		this.reward = reward;
+		this.requirement = requirement;
+		this.animator = animator;
+	}
+	
+	// Might make a builder class or something IDK.
+	public Exercise(ResourceLocation name, ExerciseStats stats, IExerciseAnimator animator) {
+		this(name, stats, stats, animator);
+	}
+
+	private IExerciseReward reward;
+	private IExerciseRequirement requirement;
+	private IExerciseAnimator animator;
 	
 	public static Exercise CURL = new Exercise(new ResourceLocation(ModConstants.MODID, "curl"),
-			new RepResult(ImmutableMap.of(MuscleGroup.BICEP, 1.0)),
-			new StrengthRequirement(ImmutableMap.of())) {
-		@Override
-		public void animate(AbstractClientPlayerEntity player, double liftProgress) {
-			RendererModel arm = getActiveArmRenderer(player);
-			arm.rotateAngleZ = 0;
-			arm.rotateAngleX = (float) (liftProgress / 100.0 * -Math.PI / 2.0);
+		new ExerciseStats(ImmutableMap.of(MuscleGroup.BICEP, 1.0)),
+		new IExerciseAnimator() {
+			@Override
+			public void animate(AbstractClientPlayerEntity player, double liftProgress) {
+				RendererModel arm = getActiveArmRenderer(player);
+				arm.rotateAngleZ = 0;
+				arm.rotateAngleX = (float) (liftProgress / 100.0 * -Math.PI / 2.0);
+			}
 		}
-		
-	};
+	);
 	
 	public static Exercise LATERAL = new Exercise(new ResourceLocation(ModConstants.MODID, "lateral"),
-			new RepResult(ImmutableMap.of(MuscleGroup.DELTOID, 1.0)),
-			new StrengthRequirement(ImmutableMap.of(MuscleGroup.BICEP, 20.0))) {
-		@Override
-		public void animate(AbstractClientPlayerEntity player, double liftProgress) {
-			RendererModel arm = getActiveArmRenderer(player);
-			arm.rotateAngleX = 0;
-			int sgn = getActiveHandSide(player) == HandSide.RIGHT ? 1 : -1;
-			arm.rotateAngleZ = (float) (liftProgress / 100.0 * sgn * Math.PI / 2.0);
+		new ExerciseStats(ImmutableMap.of(MuscleGroup.DELTOID, 1.0)),
+		new IExerciseAnimator() {
+			@Override
+			public void animate(AbstractClientPlayerEntity player, double liftProgress) {
+				RendererModel arm = getActiveArmRenderer(player);
+				arm.rotateAngleX = 0;
+				int sgn = getActiveHandSide(player) == HandSide.RIGHT ? 1 : -1;
+				arm.rotateAngleZ = (float) (liftProgress / 100.0 * sgn * Math.PI / 2.0);
+			}
 		}
-		
-	};
+	);
 	
 	public static Exercise SQUAT = new Exercise(new ResourceLocation(ModConstants.MODID, "squat"),
-			new RepResult(ImmutableMap.of(MuscleGroup.GLUTEAL, 1.0)),
-			new StrengthRequirement(ImmutableMap.of())) {
-		@Override
-		public void animate(AbstractClientPlayerEntity player, double liftProgress) {
-			double progress = liftProgress / 100.0,
-					angle = (1.0 - progress) * Math.PI / 4.0,
-					bodyHeight = 10.0,
-					bodyPosY = bodyHeight / 16.0  * (1.0 - Math.cos(angle)),
-					bodyPosZ = -bodyHeight / 16.0 * Math.sin(angle);
-			PlayerModel<AbstractClientPlayerEntity> model = getPlayerModel(player);
-			// Set arm z rotations to 0
-			model.bipedLeftArm.rotateAngleZ = 0;
-			model.bipedRightArm.rotateAngleZ = 0;
-			// Rotate arms up
-			model.bipedLeftArm.rotateAngleX = (float) Math.PI;
-			model.bipedRightArm.rotateAngleX = (float) Math.PI;
-			// Set body rotation
-			model.bipedBody.rotateAngleX = (float) angle;
-			// Set body position
-			model.bipedBody.rotationPointY = (float) bodyPosY;
-			model.bipedHead.rotationPointY = (float) bodyPosY;
-			model.bipedLeftArm.rotationPointY = (float) bodyPosY;
-			model.bipedRightArm.rotationPointY = (float) bodyPosY;
-			model.bipedBody.rotationPointZ = (float) bodyPosZ;
-			model.bipedHead.rotationPointZ = (float) bodyPosZ;
-			model.bipedLeftArm.rotationPointZ = (float) bodyPosZ;
-			model.bipedRightArm.rotationPointZ = (float) bodyPosZ;
-		}
-
-		@Override
-		public void onRemove(PlayerEntity player) {
-			// Side check
-			if (player.world.isRemote) {
-				PlayerModel<AbstractClientPlayerEntity> model = getPlayerModel((AbstractClientPlayerEntity) player);
+		new ExerciseStats(ImmutableMap.of(MuscleGroup.GLUTEAL, 1.0)),
+		new IExerciseAnimator() {
+			@Override
+			public void animate(AbstractClientPlayerEntity player, double liftProgress) {
+				// TODO Abstract some of this out
+				double progress = liftProgress / 100.0,
+						angle = (1.0 - progress) * Math.PI / 4.0,
+						bodyHeight = 10.0,
+						bodyPosY = bodyHeight / 16.0  * (1.0 - Math.cos(angle)),
+						bodyPosZ = -bodyHeight / 16.0 * Math.sin(angle);
+				PlayerModel<AbstractClientPlayerEntity> model = getPlayerModel(player);
+				// Set arm z rotations to 0
+				model.bipedLeftArm.rotateAngleZ = 0;
+				model.bipedRightArm.rotateAngleZ = 0;
+				// Rotate arms up
+				model.bipedLeftArm.rotateAngleX = (float) Math.PI;
+				model.bipedRightArm.rotateAngleX = (float) Math.PI;
+				// Set body rotation
+				model.bipedBody.rotateAngleX = (float) angle;
+				// Set body position
+				model.bipedBody.rotationPointY = (float) bodyPosY;
+				model.bipedHead.rotationPointY = (float) bodyPosY;
+				model.bipedLeftArm.rotationPointY = (float) bodyPosY;
+				model.bipedRightArm.rotationPointY = (float) bodyPosY;
+				model.bipedBody.rotationPointZ = (float) bodyPosZ;
+				model.bipedHead.rotationPointZ = (float) bodyPosZ;
+				model.bipedLeftArm.rotationPointZ = (float) bodyPosZ;
+				model.bipedRightArm.rotationPointZ = (float) bodyPosZ;
+			}
+	
+			@Override
+			public void end(AbstractClientPlayerEntity player) {
+				PlayerModel<AbstractClientPlayerEntity> model = getPlayerModel(player);
 				model.bipedBody.rotationPointY = 0;
 				model.bipedHead.rotationPointY = 0;
 				model.bipedRightArm.rotationPointY = 0;
@@ -226,8 +227,9 @@ public abstract class Exercise extends ForgeRegistryEntry<Exercise> {
 				model.bipedLeftArm.rotationPointZ = 0;
 			}
 		}
-		
-	};
+	);
+	
+	public static final ImmutableList<Exercise> EXERCISES = ImmutableList.of(CURL, LATERAL, SQUAT);
 	
 	@EventBusSubscriber(bus = Bus.MOD)
 	public static class Registrar {
@@ -243,11 +245,14 @@ public abstract class Exercise extends ForgeRegistryEntry<Exercise> {
 
 		@SubscribeEvent
 		public static void register(RegistryEvent.Register<Exercise> event) {
-			event.getRegistry().registerAll(CURL, LATERAL, SQUAT);
+			EXERCISES.forEach((exercise) -> {
+				event.getRegistry().register(exercise);
+			});
 		}
 		
 	}
 	
+	// Maybe move these methods to a utility class
 	private static PlayerRenderer getRenderPlayer(AbstractClientPlayerEntity player) {
 		EntityRendererManager manager = Minecraft.getInstance().getRenderManager();
 		return manager.getSkinMap().get(player.getSkinType());
