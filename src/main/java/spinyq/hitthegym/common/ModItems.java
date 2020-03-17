@@ -17,7 +17,7 @@ import spinyq.hitthegym.common.item.ItemWeight;
 public class ModItems {
 	
 	public static final ItemWeight DUMBBELL = new ItemWeight(
-			new ResourceLocation(ModConstants.MODID, "dumbell"),
+			new ResourceLocation(ModConstants.MODID, "dumbbell"),
 			new Item.Properties().maxStackSize(1),
 			new LifterContext(ImmutableList.of(Exercise.CURL, Exercise.LATERAL), 1.0));
 	

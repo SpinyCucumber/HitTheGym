@@ -1,7 +1,5 @@
 package spinyq.hitthegym.common.capability;
 
-import java.util.concurrent.Callable;
-
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.INBT;
@@ -50,9 +48,8 @@ public class LifterCapability {
 		
 		public Provider(PlayerEntity player) {
 			// Initialize instance and pass reference to player
-			Lifter lifter = new Lifter();
-			lifter.setPlayer(player);
-			instance = new LifterHolder(lifter);
+			instance = new LifterHolder(player);
+			instance.setLifter(new Lifter());
 		}
 
 		@Override
@@ -79,20 +76,6 @@ public class LifterCapability {
 				HitTheGym.LOGGER.info("Attaching Lifter Capability to player {}", player);
 				event.addCapability(RESOURCE_LOCATION, new Provider(player));
 			}
-		}
-		
-	}
-	
-	/**
-	 * Handles creating a default ILifter instance.
-	 * @author spinyq
-	 *
-	 */
-	public static class Factory implements Callable<LifterHolder> {
-
-		@Override
-		public LifterHolder call() throws Exception {
-			return new LifterHolder(new Lifter());
 		}
 		
 	}
@@ -132,7 +115,7 @@ public class LifterCapability {
 	}
 	
 	public static void register() {
-		CapabilityManager.INSTANCE.register(LifterHolder.class, new Storage(), new Factory());
+		CapabilityManager.INSTANCE.register(LifterHolder.class, new Storage(), () -> null);
 	}
 	
 	@SubscribeEvent

@@ -29,9 +29,9 @@ public class MessageLifterChange {
 				if (message.lifter instanceof Lifter.Active) {
 					Lifter.Active lifter = (Lifter.Active) message.lifter;
 					// Write exercise
-					((IForgePacketBuffer) buffer).writeRegistryId(lifter.exercise);
+					((IForgePacketBuffer) buffer).writeRegistryId(lifter.getExercise());
 					// Write the context
-					lifter.context.write(buffer);
+					lifter.getContext().write(buffer);
 					// Write whether we are actively lifting
 					buffer.writeBoolean(lifter.lifting);
 				}
@@ -47,10 +47,10 @@ public class MessageLifterChange {
 					// Construct the new lifter state
 					Lifter.Active lifter = new Lifter.Active();
 					// Read exercise
-					lifter.exercise = ((IForgePacketBuffer) buffer).readRegistryIdSafe(Exercise.class);
+					lifter.setExercise(((IForgePacketBuffer) buffer).readRegistryIdSafe(Exercise.class));
 					// Read the context
-					lifter.context = new LifterContext();
-					lifter.context.read(buffer);
+					lifter.setContext(new LifterContext());
+					lifter.getContext().read(buffer);
 					// Read lifting
 					lifter.lifting = buffer.readBoolean();
 					message.lifter = lifter;

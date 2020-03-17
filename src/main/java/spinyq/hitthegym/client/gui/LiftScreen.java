@@ -48,8 +48,10 @@ public class LiftScreen extends Screen {
 		// When GUI is opened, set lifter state to active
 		// Start with first exercise
 		iExercise = 0;
-		lifter = new Active(context, context.exercises.getList().get(iExercise));
+		lifter = new Active(context);
+		// This needs to be called first so we can associate the player
 		lifterHolder.setLifter(lifter);
+		lifter.setExercise(context.exercises.getList().get(iExercise));
 		lifter.sendToServer();
 	}
 
@@ -68,7 +70,7 @@ public class LiftScreen extends Screen {
 		// Draw bar... first bind texture
 		this.getMinecraft().getTextureManager().bindTexture(new ResourceLocation("hitthegym:textures/gui.png"));
 		// Draw interior of bar using lift progress
-		int barHeight = (int) (64 * lifter.liftProgress / lifter.maxLiftProgress);
+		int barHeight = (int) (64 * lifter.liftProgress);
 		blit(this.width - 32, this.height - barHeight, 32, 64 - barHeight, 32, barHeight);
 		// Draw bar exterior
 		blit(this.width - 32, this.height - 64, 0, 0, 32, 64);
@@ -86,13 +88,13 @@ public class LiftScreen extends Screen {
 		if (mouseButton == LIFT_BUTTON) {
 			// Check to see if the player is strong enough
 			// If they are, start lifting.
-			if (lifter.exercise.getRequirement().isMet(strengthsHolder.getStrengths())) {
+			if (lifter.getExercise().getRequirement().isMet(strengthsHolder.getStrengths(), context)) {
 				lifter.lifting = true;
 				lifter.sendToServer();
 			}
 			// If not, tell them they are not strong enough
 			else {
-				ITextComponent text = lifter.exercise.getRequirement().getStatusMessage(strengthsHolder.getStrengths());
+				ITextComponent text = lifter.getExercise().getRequirement().getStatusMessage(strengthsHolder.getStrengths(), context);
 				lifter.getPlayer().sendStatusMessage(text, true);
 			}
 			return true;
@@ -100,7 +102,7 @@ public class LiftScreen extends Screen {
 		// Cycle exercise if right click
 		else if (lifter.liftProgress == 0.0 && mouseButton == CYCLE_BUTTON) {
 			iExercise = (iExercise + 1) % context.exercises.getList().size();
-			lifter.exercise = context.exercises.getList().get(iExercise);
+			lifter.setExercise(context.exercises.getList().get(iExercise));
 			lifter.sendToServer();
 			return true;
 		}

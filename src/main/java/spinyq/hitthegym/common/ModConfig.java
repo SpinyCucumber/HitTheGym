@@ -30,4 +30,9 @@ public class ModConfig {
 		return (Math.log(strength / difficulty) / Math.log(2.0)) + 1.0;
 	};
 	
+	/**
+	 * This number is multiplied by lift speed to determine how quickly a player drops a weight.
+	 */
+	public static final double DROP_SPEED_MULTIPLIER = 2.0;
+	
 }

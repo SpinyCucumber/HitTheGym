@@ -26,6 +26,7 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 import net.minecraftforge.registries.RegistryBuilder;
 import spinyq.hitthegym.common.HitTheGym;
+import spinyq.hitthegym.common.ModConfig;
 import spinyq.hitthegym.common.ModConstants;
 
 /**
@@ -43,7 +44,7 @@ public class Exercise extends ForgeRegistryEntry<Exercise> {
 	 */
 	public static interface IExerciseReward {
 		
-		void reward(Strengths strengths);
+		void reward(Strengths strengths, LifterContext context);
 		
 	}
 	
@@ -54,9 +55,15 @@ public class Exercise extends ForgeRegistryEntry<Exercise> {
 	 */
 	public static interface IExerciseRequirement {
 		
-		boolean isMet(Strengths strengths);
+		boolean isMet(Strengths strengths, LifterContext context);
 		
-		ITextComponent getStatusMessage(Strengths strengths);
+		ITextComponent getStatusMessage(Strengths strengths, LifterContext context);
+		
+	}
+	
+	public static interface ILiftSpeedProvider {
+		
+		double getLiftSpeed(Strengths strengths, LifterContext context);
 		
 	}
 	
@@ -74,7 +81,7 @@ public class Exercise extends ForgeRegistryEntry<Exercise> {
 		
 	}
 	
-	public static class ExerciseStats implements IExerciseReward, IExerciseRequirement {
+	public static class ExerciseStats implements IExerciseReward, IExerciseRequirement, ILiftSpeedProvider {
 		
 		private ImmutableMap<MuscleGroup, Double> difficulty;
 
@@ -87,17 +94,17 @@ public class Exercise extends ForgeRegistryEntry<Exercise> {
 		 * @return Whether the particular strengths satisfy the requirement
 		 */
 		@Override
-		public boolean isMet(Strengths strengths) {
+		public boolean isMet(Strengths strengths, LifterContext context) {
 			for (Map.Entry<MuscleGroup, Double> entry : difficulty.entrySet()) {
-				if (strengths.getStrength(entry.getKey()) < entry.getValue()) return false;
+				if (strengths.getStrength(entry.getKey()) < entry.getValue() * context.difficultyMultiplier) return false;
 			}
 			return true;
 		}
 		
 		@Override
-		public ITextComponent getStatusMessage(Strengths strengths) {
+		public ITextComponent getStatusMessage(Strengths strengths, LifterContext context) {
 			for (Map.Entry<MuscleGroup, Double> entry : difficulty.entrySet()) {
-				if (strengths.getStrength(entry.getKey()) < entry.getValue()) {
+				if (strengths.getStrength(entry.getKey()) < entry.getValue() * context.difficultyMultiplier) {
 					// TODO Translate muscle groups
 					return new TranslationTextComponent("message.hitthegym.tooweak", entry.getKey().getPluralName());
 				}
@@ -107,11 +114,23 @@ public class Exercise extends ForgeRegistryEntry<Exercise> {
 		}
 
 		@Override
-		public void reward(Strengths strengths) {
+		public void reward(Strengths strengths, LifterContext context) {
 			// Increase muscle strengths
 			for (Map.Entry<MuscleGroup, Double> entry : difficulty.entrySet()) {
-				strengths.addStrength(entry.getKey(), entry.getValue());
+				strengths.addStrength(entry.getKey(), context.difficultyMultiplier * ModConfig.REWARD_MULTIPLIER * entry.getValue());
 			}
+		}
+
+		@Override
+		public double getLiftSpeed(Strengths strengths, LifterContext context) {
+			// Calculating lift speed can be ambiguous when multiple muscle groups are involved.
+			// For now, I'm using the minimum of a "lift speed function" applied to each muscle group.
+			double min = Double.MAX_VALUE;
+			for (Map.Entry<MuscleGroup, Double> entry : difficulty.entrySet()) {
+				double speed = ModConfig.LIFT_SPEED_FUNC.apply(context.difficultyMultiplier * entry.getValue(), strengths.getStrength(entry.getKey()));
+				min = Math.min(min, speed);
+			}
+			return min;
 		}
 		
 	}
@@ -138,25 +157,31 @@ public class Exercise extends ForgeRegistryEntry<Exercise> {
 		return requirement;
 	}
 
+	public ILiftSpeedProvider getSpeedProvider() {
+		return speedProvider;
+	}
+
 	public IExerciseAnimator getAnimator() {
 		return animator;
 	}
 
-	public Exercise(ResourceLocation name, IExerciseReward reward, IExerciseRequirement requirement, IExerciseAnimator animator) {
+	public Exercise(ResourceLocation name, IExerciseReward reward, IExerciseRequirement requirement, ILiftSpeedProvider speedProvider, IExerciseAnimator animator) {
 		this.setRegistryName(name);
 		this.reward = reward;
 		this.requirement = requirement;
 		this.animator = animator;
+		this.speedProvider = speedProvider;
 	}
 	
 	// Might make a builder class or something IDK.
 	public Exercise(ResourceLocation name, ExerciseStats stats, IExerciseAnimator animator) {
-		this(name, stats, stats, animator);
+		this(name, stats, stats, stats, animator);
 	}
 
 	private IExerciseReward reward;
 	private IExerciseRequirement requirement;
 	private IExerciseAnimator animator;
+	private ILiftSpeedProvider speedProvider;
 	
 	public static Exercise CURL = new Exercise(new ResourceLocation(ModConstants.MODID, "curl"),
 		new ExerciseStats(ImmutableMap.of(MuscleGroup.BICEP, 1.0)),
